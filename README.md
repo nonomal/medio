@@ -1,4 +1,4 @@
-# Medio
+# Medio - A MacOS Diff Checker
 
 ![image](https://github.com/user-attachments/assets/bf2e4860-d209-4c17-b74b-592dec01ed5e)
 
