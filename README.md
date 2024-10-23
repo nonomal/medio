@@ -8,19 +8,20 @@ Because the really world needed another diff checker.
 
 ## ✨ Features
 
--  **Real-time Comparison**: See differences instantly as you type
--  **Smart Diff Detection**: Intelligent word-level difference highlighting
--  **Keyboard Friendly**: Full support for keyboard shortcuts including undo/redo
--  **Dark and Light modes**: Of course
--  **Native Performance**: Built with SwiftUI and AppKit for optimal performance
+- **Real-time Comparison**: See differences instantly as you type
+- **Smart Diff Detection**: Intelligent word-level difference highlighting
+- **Keyboard Friendly**: Full support for keyboard shortcuts including undo/redo
+- **Dark and Light modes**: Of course
+- **Native Performance**: Built with SwiftUI and AppKit for optimal performance
 
--  ![42115](https://github.com/user-attachments/assets/d4a202c5-a160-4a66-a7c7-dad346de86a3)
-
+- ![42115](https://github.com/user-attachments/assets/d4a202c5-a160-4a66-a7c7-dad346de86a3)
 
 ## Get it
 
 You can find the .app here:
 [mediano.vercel.app](https://mediano.vercel.app)
+
+Or download from the [releases](https://github.com/nuance-dev/Medio/releases/tag/Release) page.
 
 This is a designer's first Swift app so it's probably really buggy, feel free to [report](https://github.com/nuance-dev/Medio/issues) any bugs found and I'll do my best to fix them.
 
@@ -32,14 +33,15 @@ This is a designer's first Swift app so it's probably really buggy, feel free to
 
 ![72366](https://github.com/user-attachments/assets/d31f9a8f-d76f-446b-bba7-c3ffdf29660e)
 
-
 ## 🚀 How It Works
 
 Medio splits your screen into two editing panes:
+
 - **Left Pane**: Original text
 - **Right Pane**: Modified text
 
 As you type or paste text into either pane, Medio automatically:
+
 1. Detects differences at both the line and word level
 2. Highlights changes in real-time
 3. Uses color coding to show:
@@ -50,6 +52,7 @@ As you type or paste text into either pane, Medio automatically:
 ## 💻 Development
 
 ### Requirements
+
 - macOS 14.5+
 - Xcode 13.0+
 - Swift 5.5+
@@ -57,11 +60,13 @@ As you type or paste text into either pane, Medio automatically:
 ### Building from Source
 
 1. Clone the repository
+
 ```bash
 git clone https://github.com/yourusername/medio.git
 ```
 
 2. Open the project in Xcode
+
 ```bash
 cd medio
 open Medio.xcodeproj
@@ -80,6 +85,7 @@ We welcome contributions! Here's how you can help:
 5. Open a Pull Request
 
 Please ensure your PR:
+
 - Follows the existing code style
 - Includes appropriate tests
 - Updates documentation as needed
