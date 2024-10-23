@@ -15,7 +15,7 @@ Because the world really needed another diff checker.
 
 ![42115](https://github.com/user-attachments/assets/d4a202c5-a160-4a66-a7c7-dad346de86a3)
 
-## Get it
+## 💻 Get it
 
 You can find the .app here:
 [mediano.vercel.app](https://mediano.vercel.app)
@@ -24,7 +24,7 @@ Or download from the [releases](https://github.com/nuance-dev/Medio/releases/tag
 
 This is a designer's first Swift app so it's probably really buggy, feel free to [report](https://github.com/nuance-dev/Medio/issues) any bugs found and I'll do my best to fix them.
 
-## Fun facts?
+## 🥑 Fun facts?
 
 - First version was made within a day by Claude Sonnet 3.5
 
