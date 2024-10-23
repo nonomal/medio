@@ -9,10 +9,8 @@ Because the really world needed another diff checker.
 ## ✨ Features
 
 -  **Real-time Comparison**: See differences instantly as you type
--  **Modern UI**: Clean, native macOS interface with light/dark mode support
 -  **Smart Diff Detection**: Intelligent word-level difference highlighting
 -  **Keyboard Friendly**: Full support for keyboard shortcuts including undo/redo
--  **Lightweight**: Small, efficient, and fast
 -  **Dark and Light modes**: Of course
 -  **Native Performance**: Built with SwiftUI and AppKit for optimal performance
 
