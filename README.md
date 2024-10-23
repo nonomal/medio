@@ -4,7 +4,7 @@
 
 A fast, native macOS text comparison tool with real-time diff highlighting and a minimal interface.
 
-Because the really world needed another diff checker.
+Because the world really needed another diff checker.
 
 ## ✨ Features
 
