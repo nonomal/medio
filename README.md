@@ -96,7 +96,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Report issues: [GitHub Issues](https://github.com/nuance-dev/Medio/issues)
 - Follow updates: [@Nuanced](https://twitter.com/Nuancedev)
 
---
+-----
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![macOS](https://img.shields.io/badge/platform-macOS-lightgrey)]()
