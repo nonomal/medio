@@ -47,18 +47,6 @@ As you type or paste text into either pane, Medio automatically:
    - 🟢 Additions (in green)
    - Changes are highlighted with corresponding background colors
 
-### Key Features Explained
-
-#### Smart Diff Detection
-- Uses linguistic analysis for accurate word boundary detection
-- Handles special characters and Unicode text correctly
-- Maintains context awareness for better diff highlighting
-
-#### Native Integration
-- Supports system-wide dark/light mode
-- Uses native macOS controls and behaviors
-- Follows Apple's Human Interface Guidelines
-
 ## 💻 Development
 
 ### Requirements
