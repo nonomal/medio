@@ -24,7 +24,7 @@ Because the really world needed another diff checker.
 You can find the .app here:
 [mediano.vercel.app](https://mediano.vercel.app)
 
-This is a designer's first Swift app so it's probably really buggy, feel free to report any bugs found and I'll do my best to fix them.
+This is a designer's first Swift app so it's probably really buggy, feel free to [report](https://github.com/nuance-dev/Medio/issues) any bugs found and I'll do my best to fix them.
 
 ## Fun facts?
 
@@ -93,7 +93,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🔗 Links
 
 - Website: [mediano.vercel.app](https://mediano.vercel.app)
-- Report issues: [GitHub Issues](https://github.com/yourusername/medio/issues)
+- Report issues: [GitHub Issues](https://github.com/nuance-dev/Medio/issues)
 - Follow updates: [@Nuanced](https://twitter.com/Nuancedev)
 
 ---
