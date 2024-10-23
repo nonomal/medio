@@ -24,6 +24,8 @@ Because the really world needed another diff checker.
 You can find the .app here:
 [mediano.vercel.app](https://mediano.vercel.app)
 
+This is a designer's first Swift app so it's probably really buggy, feel free to report any bugs found and I'll do my best to fix them.
+
 ## Fun facts?
 
 - First version was made within a day by Claude Sonnet 3.5
