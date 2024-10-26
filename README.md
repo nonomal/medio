@@ -1,8 +1,8 @@
-# Medio - A MacOS Diff Checker
+# Medio - A Free MacOS Diff Checker
 
 ![image](https://github.com/user-attachments/assets/bf2e4860-d209-4c17-b74b-592dec01ed5e)
 
-A fast, native macOS text comparison tool with real-time diff highlighting and a minimal interface.
+A fast, native and free macOS text comparison tool with real-time diff highlighting and a minimal interface.
 
 Because the world really needed another diff checker.
 
