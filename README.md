@@ -20,7 +20,7 @@ Because the world really needed another diff checker.
 You can find the .app here:
 [mediano.vercel.app](https://mediano.vercel.app)
 
-Or download from the [releases](https://github.com/nuance-dev/Medio/releases/tag/Release) page.
+Or download from the [releases](https://github.com/nuance-dev/Medio/releases) page.
 
 This is a designer's first Swift app so it's probably really buggy, feel free to [report](https://github.com/nuance-dev/Medio/issues) any bugs found and I'll do my best to fix them.
 
