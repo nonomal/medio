@@ -145,7 +145,7 @@ class StatementAnalyzer {
                 // Highlight if source has destructuring but target doesn't
                 diffs.append(WordDiff(range: sourceDestruct.range, type: .deletion))
             }
-        } else if let targetDestruct = targetParts.first(where: { $0.type == .destructuring }) {
+        } else if targetParts.first(where: { $0.type == .destructuring }) != nil {
             // Find where the destructuring would have been in source
             if let sourceModule = sourceParts.first(where: { $0.type == .identifier }) {
                 let destructRange = NSRange(
