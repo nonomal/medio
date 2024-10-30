@@ -1,15 +1,12 @@
-// Utils/DiffAnalyzer.swift
 import Foundation
 
 class DiffAnalyzer {
     private let sourceText: String
     private let targetText: String
-    private let language: CodeLanguage
     
     init(sourceText: String, targetText: String) {
         self.sourceText = sourceText
         self.targetText = targetText
-        self.language = CodeLanguage.detect(from: sourceText)
     }
     
     private func getLinesWithRanges(_ text: String) -> [(String, NSRange)] {
@@ -52,11 +49,9 @@ class DiffAnalyzer {
         }
         
         // Check for complete variable declarations
-        if language == .javascript && (
-            trimmedLine.starts(with: "const ") ||
+        if trimmedLine.starts(with: "const ") ||
             trimmedLine.starts(with: "let ") ||
-            trimmedLine.starts(with: "var ")
-        ) && trimmedLine.contains("=") {
+            trimmedLine.starts(with: "var ") && trimmedLine.contains("=") {
             return true
         }
         
@@ -216,13 +211,8 @@ class DiffAnalyzer {
                     let totalTokens = sourceTokens.union(targetTokens)
                     
                     if !totalTokens.isEmpty {
-                        let keywordWeight = 1.5
-                        let weightedCommonCount = commonTokens.reduce(0.0) { sum, token in
-                            sum + (language.keywords.contains(token) ? keywordWeight : 1.0)
-                        }
-                        let weightedTotalCount = totalTokens.reduce(0.0) { sum, token in
-                            sum + (language.keywords.contains(token) ? keywordWeight : 1.0)
-                        }
+                        let weightedCommonCount = Double(commonTokens.count)
+                        let weightedTotalCount = Double(totalTokens.count)
                         
                         let similarity = weightedCommonCount / weightedTotalCount
                         if similarity > bestMatchScore {
@@ -248,13 +238,8 @@ class DiffAnalyzer {
                             continue
                         }
                         
-                        let isKeyword = language.keywords.contains(sourceToken.0)
                         let foundInTarget = targetTokens.contains { targetToken in
-                            if isKeyword {
-                                return sourceToken.0 == targetToken.0
-                            } else {
-                                return StringUtils.compareStrings(sourceToken.0, targetToken.0)
-                            }
+                            StringUtils.compareStrings(sourceToken.0, targetToken.0)
                         }
                         
                         if !foundInTarget {
@@ -270,13 +255,8 @@ class DiffAnalyzer {
                                     continue
                                 }
                                 
-                                let nextIsKeyword = language.keywords.contains(nextToken.0)
                                 let foundNextInTarget = targetTokens.contains { targetToken in
-                                    if nextIsKeyword {
-                                        return nextToken.0 == targetToken.0
-                                    } else {
-                                        return StringUtils.compareStrings(nextToken.0, targetToken.0)
-                                    }
+                                    StringUtils.compareStrings(nextToken.0, targetToken.0)
                                 }
                                 
                                 if !foundNextInTarget {

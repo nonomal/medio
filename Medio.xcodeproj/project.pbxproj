@@ -16,7 +16,6 @@
 		C8D338112C7FDEB300FA383B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C8D338102C7FDEB300FA383B /* Preview Assets.xcassets */; };
 		C8D4F3E12CD2B0DA007A9A0E /* DiffTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D4F3E02CD2B0D6007A9A0E /* DiffTypes.swift */; };
 		C8D4F3E32CD2B0F5007A9A0E /* StringUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D4F3E22CD2B0F0007A9A0E /* StringUtils.swift */; };
-		C8D4F3E52CD2B10E007A9A0E /* CodeLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D4F3E42CD2B108007A9A0E /* CodeLanguage.swift */; };
 		C8D4F3E92CD2B13E007A9A0E /* DiffTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D4F3E82CD2B13B007A9A0E /* DiffTextView.swift */; };
 		C8D4F3EB2CD2B19E007A9A0E /* CustomTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D4F3EA2CD2B19B007A9A0E /* CustomTextView.swift */; };
 /* End PBXBuildFile section */
@@ -52,7 +51,6 @@
 		C8D338212C7FDEB300FA383B /* MedioUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MedioUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C8D4F3E02CD2B0D6007A9A0E /* DiffTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffTypes.swift; sourceTree = "<group>"; };
 		C8D4F3E22CD2B0F0007A9A0E /* StringUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringUtils.swift; sourceTree = "<group>"; };
-		C8D4F3E42CD2B108007A9A0E /* CodeLanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeLanguage.swift; sourceTree = "<group>"; };
 		C8D4F3E82CD2B13B007A9A0E /* DiffTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffTextView.swift; sourceTree = "<group>"; };
 		C8D4F3EA2CD2B19B007A9A0E /* CustomTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -121,7 +119,6 @@
 				C8D3380B2C7FDEB100FA383B /* ContentView.swift */,
 				C8D4F3E02CD2B0D6007A9A0E /* DiffTypes.swift */,
 				C8D4F3E22CD2B0F0007A9A0E /* StringUtils.swift */,
-				C8D4F3E42CD2B108007A9A0E /* CodeLanguage.swift */,
 				C8D4F3EE2CD2BB6C007A9A0E /* Utils */,
 				C8D4F3E82CD2B13B007A9A0E /* DiffTextView.swift */,
 				C8D4F3EA2CD2B19B007A9A0E /* CustomTextView.swift */,
@@ -279,7 +276,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				C8D3380C2C7FDEB100FA383B /* ContentView.swift in Sources */,
-				C8D4F3E52CD2B10E007A9A0E /* CodeLanguage.swift in Sources */,
 				C8D4F3EB2CD2B19E007A9A0E /* CustomTextView.swift in Sources */,
 				C82607AB2C81649800518D65 /* TitleBarAccessory.swift in Sources */,
 				C8D4F3E12CD2B0DA007A9A0E /* DiffTypes.swift in Sources */,
