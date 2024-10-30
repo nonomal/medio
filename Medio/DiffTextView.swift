@@ -6,6 +6,8 @@ struct DiffTextView: NSViewRepresentable {
     @Binding var comparisonText: String
     var side: DiffSide
     
+    static let textDidChangeNotification = NSNotification.Name("DiffTextViewDidChangeNotification")
+    
     func makeNSView(context: Context) -> NSScrollView {
         let scrollView = NSScrollView()
         let textView = CustomTextView()
@@ -15,9 +17,8 @@ struct DiffTextView: NSViewRepresentable {
         textView.delegate = context.coordinator
         textView.isEditable = true
         textView.isSelectable = true
-        textView.drawsBackground = false
         textView.font = .monospacedSystemFont(ofSize: 14, weight: .regular)
-        textView.textContainerInset = NSSize(width: 10, height: 10)
+        textView.textContainerInset = NSSize(width: 5, height: 10)
         textView.isVerticallyResizable = true
         textView.isHorizontallyResizable = false
         textView.autoresizingMask = [.width]
@@ -30,7 +31,23 @@ struct DiffTextView: NSViewRepresentable {
         scrollView.hasVerticalScroller = true
         scrollView.hasHorizontalScroller = false
         scrollView.autohidesScrollers = true
-        scrollView.drawsBackground = false
+        
+        // Add line number ruler view
+        let lineNumberView = LineNumberRulerView(scrollView: scrollView)
+        scrollView.verticalRulerView = lineNumberView
+        scrollView.hasVerticalRuler = true
+        scrollView.rulersVisible = true
+        
+        // Store textView reference in coordinator
+        context.coordinator.textView = textView
+        
+        // Add observer for text changes
+        NotificationCenter.default.addObserver(
+            context.coordinator,
+            selector: #selector(Coordinator.handleTextChange(_:)),
+            name: DiffTextView.textDidChangeNotification,
+            object: nil
+        )
         
         return scrollView
     }
@@ -42,8 +59,10 @@ struct DiffTextView: NSViewRepresentable {
             let selectedRange = textView.selectedRange()
             textView.string = text
             textView.setSelectedRange(selectedRange)
+            highlightDifferences(in: textView)
         }
-        highlightDifferences(in: textView)
+        
+        scrollView.verticalRulerView?.needsDisplay = true
     }
     
     func makeCoordinator() -> Coordinator {
@@ -54,10 +73,8 @@ struct DiffTextView: NSViewRepresentable {
         let attributedString = NSMutableAttributedString(string: text)
         let fullRange = NSRange(location: 0, length: text.utf16.count)
         
-        // Reset attributes
         attributedString.addAttributes([
             .foregroundColor: NSColor.labelColor,
-            .backgroundColor: NSColor.clear,
             .font: NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
         ], range: fullRange)
         
@@ -69,8 +86,8 @@ struct DiffTextView: NSViewRepresentable {
             
             if lineDiff.isDifferent {
                 let backgroundColor = side == .left ?
-                    NSColor.systemRed.withAlphaComponent(0.1) :
-                    NSColor.systemGreen.withAlphaComponent(0.1)
+                    NSColor.systemRed.withAlphaComponent(0.2) :
+                    NSColor.systemGreen.withAlphaComponent(0.2)
                 
                 attributedString.addAttribute(
                     .backgroundColor,
@@ -85,13 +102,9 @@ struct DiffTextView: NSViewRepresentable {
                         NSColor.systemRed :
                         NSColor(calibratedRed: 0, green: 0.6, blue: 0, alpha: 1.0)
                     
-                    let specificBackgroundColor = side == .left ?
-                        NSColor.systemRed.withAlphaComponent(0.2) :
-                        NSColor.systemGreen.withAlphaComponent(0.2)
-                    
                     attributedString.addAttributes([
                         .foregroundColor: foregroundColor,
-                        .backgroundColor: specificBackgroundColor
+                        .backgroundColor: backgroundColor
                     ], range: wordDiff.range)
                 }
             }
@@ -103,10 +116,71 @@ struct DiffTextView: NSViewRepresentable {
     class Coordinator: NSObject, NSTextViewDelegate {
         var parent: DiffTextView
         var isEditing = false
-        var lastSelectedRange: NSRange?
+        var isProcessingChange = false
+        weak var textView: NSTextView?
         
         init(_ parent: DiffTextView) {
             self.parent = parent
+        }
+        
+        func textDidBeginEditing(_ notification: Notification) {
+            isEditing = true
+        }
+        
+        func textDidEndEditing(_ notification: Notification) {
+            isEditing = false
+            if let textView = notification.object as? NSTextView {
+                updateText(from: textView)
+            }
+        }
+        
+        func textDidChange(_ notification: Notification) {
+            guard let textView = notification.object as? NSTextView,
+                  !isProcessingChange else { return }
+            
+            updateText(from: textView)
+            
+            // Notify about text change
+            NotificationCenter.default.post(
+                name: DiffTextView.textDidChangeNotification,
+                object: nil,
+                userInfo: ["side": parent.side]
+            )
+        }
+        
+        @objc func handleTextChange(_ notification: Notification) {
+            guard let userInfo = notification.userInfo,
+                  let side = userInfo["side"] as? DiffSide,
+                  side != parent.side,
+                  let textView = self.textView else { return }
+            
+            // Trigger an update on the other side
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.parent.highlightDifferences(in: textView)
+            }
+        }
+        
+        private func updateText(from textView: NSTextView) {
+            isProcessingChange = true
+            
+            let currentRange = textView.selectedRange()
+            let visibleRect = textView.visibleRect
+            
+            parent.text = textView.string
+            
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                
+                self.parent.highlightDifferences(in: textView)
+                
+                if currentRange.location <= textView.string.count {
+                    textView.setSelectedRange(currentRange)
+                    textView.scrollToVisible(visibleRect)
+                }
+                
+                self.isProcessingChange = false
+            }
         }
         
         func textView(_ textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
@@ -116,36 +190,56 @@ struct DiffTextView: NSViewRepresentable {
             }
             return false
         }
-        
-        func textDidBeginEditing(_ notification: Notification) {
-            isEditing = true
-            if let textView = notification.object as? NSTextView {
-                lastSelectedRange = textView.selectedRange()
-            }
+    }
+}
+
+// LineNumberRulerView and CustomTextView remain unchanged
+class LineNumberRulerView: NSRulerView {
+    var font: NSFont = .monospacedSystemFont(ofSize: 11, weight: .regular)
+    
+    init(scrollView: NSScrollView) {
+        super.init(scrollView: scrollView, orientation: .verticalRuler)
+        self.clientView = scrollView.documentView as? NSTextView
+        self.ruleThickness = 40
+    }
+    
+    required init(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func drawHashMarksAndLabels(in rect: NSRect) {
+        guard let textView = self.clientView as? NSTextView,
+              let layoutManager = textView.layoutManager,
+              let container = textView.textContainer,
+              let content = textView.string as NSString? else {
+            return
         }
         
-        func textDidEndEditing(_ notification: Notification) {
-            isEditing = false
-            if let textView = notification.object as? NSTextView {
-                parent.text = textView.string
-                DispatchQueue.main.async { [self] in
-                    parent.highlightDifferences(in: textView)
-                }
+        let visibleRect = textView.visibleRect
+        _ = layoutManager.glyphRange(forBoundingRect: visibleRect, in: container)
+        
+        var lineNumber = 1
+        
+        content.enumerateSubstrings(in: NSRange(location: 0, length: content.length),
+                                  options: [.byLines, .substringNotRequired]) { _, range, _, _ in
+            let glyphRange = layoutManager.glyphRange(forCharacterRange: range, actualCharacterRange: nil)
+            let glyphRect = layoutManager.boundingRect(forGlyphRange: glyphRange, in: container)
+            
+            if glyphRect.intersects(visibleRect) {
+                let attributes: [NSAttributedString.Key: Any] = [
+                    .font: self.font,
+                    .foregroundColor: NSColor.secondaryLabelColor
+                ]
+                
+                let lineNumberString = "\(lineNumber)"
+                let size = lineNumberString.size(withAttributes: attributes)
+                let x = self.bounds.width - size.width - 4
+                let y = glyphRect.minY + textView.textContainerInset.height
+                
+                lineNumberString.draw(at: CGPoint(x: x, y: y), withAttributes: attributes)
             }
+            
+            lineNumber += 1
         }
-        func textDidChange(_ notification: Notification) {
-                    guard let textView = notification.object as? NSTextView else { return }
-                    let currentRange = textView.selectedRange()
-                    parent.text = textView.string
-                    
-                    DispatchQueue.main.async { [self] in
-                        parent.highlightDifferences(in: textView)
-                        if currentRange.location <= textView.string.count {
-                            textView.setSelectedRange(currentRange)
-                        }
-                    }
-                    
-                    lastSelectedRange = currentRange
-                }
-            }
-        }
+    }
+}
