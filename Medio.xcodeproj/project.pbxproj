@@ -9,15 +9,18 @@
 /* Begin PBXBuildFile section */
 		C82607AB2C81649800518D65 /* TitleBarAccessory.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82607AA2C81649800518D65 /* TitleBarAccessory.swift */; };
 		C82607AD2C81656C00518D65 /* WindowAccessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82607AC2C81656C00518D65 /* WindowAccessor.swift */; };
-		C82607B02C816B6900518D65 /* HighlightingTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82607AF2C816B6900518D65 /* HighlightingTextView.swift */; };
 		C82607B22C816B9A00518D65 /* VisualEffectBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82607B12C816B9A00518D65 /* VisualEffectBlur.swift */; };
 		C8D3380A2C7FDEB100FA383B /* MedioApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D338092C7FDEB100FA383B /* MedioApp.swift */; };
 		C8D3380C2C7FDEB100FA383B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D3380B2C7FDEB100FA383B /* ContentView.swift */; };
 		C8D3380E2C7FDEB300FA383B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C8D3380D2C7FDEB300FA383B /* Assets.xcassets */; };
 		C8D338112C7FDEB300FA383B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C8D338102C7FDEB300FA383B /* Preview Assets.xcassets */; };
-		C8D3381C2C7FDEB300FA383B /* MedioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D3381B2C7FDEB300FA383B /* MedioTests.swift */; };
-		C8D338262C7FDEB300FA383B /* MedioUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D338252C7FDEB300FA383B /* MedioUITests.swift */; };
-		C8D338282C7FDEB300FA383B /* MedioUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D338272C7FDEB300FA383B /* MedioUITestsLaunchTests.swift */; };
+		C8D4F3E12CD2B0DA007A9A0E /* DiffTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D4F3E02CD2B0D6007A9A0E /* DiffTypes.swift */; };
+		C8D4F3E32CD2B0F5007A9A0E /* StringUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D4F3E22CD2B0F0007A9A0E /* StringUtils.swift */; };
+		C8D4F3E52CD2B10E007A9A0E /* CodeLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D4F3E42CD2B108007A9A0E /* CodeLanguage.swift */; };
+		C8D4F3E72CD2B123007A9A0E /* DiffAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D4F3E62CD2B120007A9A0E /* DiffAnalyzer.swift */; };
+		C8D4F3E92CD2B13E007A9A0E /* DiffTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D4F3E82CD2B13B007A9A0E /* DiffTextView.swift */; };
+		C8D4F3EB2CD2B19E007A9A0E /* CustomTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D4F3EA2CD2B19B007A9A0E /* CustomTextView.swift */; };
+		C8D4F3ED2CD2B397007A9A0E /* StatementAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D4F3EC2CD2B394007A9A0E /* StatementAnalyzer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,7 +43,6 @@
 /* Begin PBXFileReference section */
 		C82607AA2C81649800518D65 /* TitleBarAccessory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleBarAccessory.swift; sourceTree = "<group>"; };
 		C82607AC2C81656C00518D65 /* WindowAccessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowAccessor.swift; sourceTree = "<group>"; };
-		C82607AF2C816B6900518D65 /* HighlightingTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightingTextView.swift; sourceTree = "<group>"; };
 		C82607B12C816B9A00518D65 /* VisualEffectBlur.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectBlur.swift; sourceTree = "<group>"; };
 		C8D338062C7FDEB100FA383B /* Medio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Medio.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C8D338092C7FDEB100FA383B /* MedioApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedioApp.swift; sourceTree = "<group>"; };
@@ -49,10 +51,14 @@
 		C8D338102C7FDEB300FA383B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		C8D338122C7FDEB300FA383B /* Medio.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Medio.entitlements; sourceTree = "<group>"; };
 		C8D338172C7FDEB300FA383B /* MedioTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MedioTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		C8D3381B2C7FDEB300FA383B /* MedioTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedioTests.swift; sourceTree = "<group>"; };
 		C8D338212C7FDEB300FA383B /* MedioUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MedioUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		C8D338252C7FDEB300FA383B /* MedioUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedioUITests.swift; sourceTree = "<group>"; };
-		C8D338272C7FDEB300FA383B /* MedioUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedioUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		C8D4F3E02CD2B0D6007A9A0E /* DiffTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffTypes.swift; sourceTree = "<group>"; };
+		C8D4F3E22CD2B0F0007A9A0E /* StringUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringUtils.swift; sourceTree = "<group>"; };
+		C8D4F3E42CD2B108007A9A0E /* CodeLanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeLanguage.swift; sourceTree = "<group>"; };
+		C8D4F3E62CD2B120007A9A0E /* DiffAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffAnalyzer.swift; sourceTree = "<group>"; };
+		C8D4F3E82CD2B13B007A9A0E /* DiffTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffTextView.swift; sourceTree = "<group>"; };
+		C8D4F3EA2CD2B19B007A9A0E /* CustomTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextView.swift; sourceTree = "<group>"; };
+		C8D4F3EC2CD2B394007A9A0E /* StatementAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatementAnalyzer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,8 +100,6 @@
 			isa = PBXGroup;
 			children = (
 				C8D338082C7FDEB100FA383B /* Medio */,
-				C8D3381A2C7FDEB300FA383B /* MedioTests */,
-				C8D338242C7FDEB300FA383B /* MedioUITests */,
 				C8D338072C7FDEB100FA383B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -115,7 +119,13 @@
 			children = (
 				C8D338092C7FDEB100FA383B /* MedioApp.swift */,
 				C8D3380B2C7FDEB100FA383B /* ContentView.swift */,
-				C82607AF2C816B6900518D65 /* HighlightingTextView.swift */,
+				C8D4F3E02CD2B0D6007A9A0E /* DiffTypes.swift */,
+				C8D4F3E22CD2B0F0007A9A0E /* StringUtils.swift */,
+				C8D4F3E42CD2B108007A9A0E /* CodeLanguage.swift */,
+				C8D4F3E62CD2B120007A9A0E /* DiffAnalyzer.swift */,
+				C8D4F3EC2CD2B394007A9A0E /* StatementAnalyzer.swift */,
+				C8D4F3E82CD2B13B007A9A0E /* DiffTextView.swift */,
+				C8D4F3EA2CD2B19B007A9A0E /* CustomTextView.swift */,
 				C82607AE2C8166F700518D65 /* UI Components */,
 				C8D3380D2C7FDEB300FA383B /* Assets.xcassets */,
 				C8D338122C7FDEB300FA383B /* Medio.entitlements */,
@@ -130,23 +140,6 @@
 				C8D338102C7FDEB300FA383B /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
-			sourceTree = "<group>";
-		};
-		C8D3381A2C7FDEB300FA383B /* MedioTests */ = {
-			isa = PBXGroup;
-			children = (
-				C8D3381B2C7FDEB300FA383B /* MedioTests.swift */,
-			);
-			path = MedioTests;
-			sourceTree = "<group>";
-		};
-		C8D338242C7FDEB300FA383B /* MedioUITests */ = {
-			isa = PBXGroup;
-			children = (
-				C8D338252C7FDEB300FA383B /* MedioUITests.swift */,
-				C8D338272C7FDEB300FA383B /* MedioUITestsLaunchTests.swift */,
-			);
-			path = MedioUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -215,7 +208,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1540;
-				LastUpgradeCheck = 1540;
+				LastUpgradeCheck = 1610;
 				TargetAttributes = {
 					C8D338052C7FDEB100FA383B = {
 						CreatedOnToolsVersion = 15.4;
@@ -284,10 +277,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				C8D3380C2C7FDEB100FA383B /* ContentView.swift in Sources */,
+				C8D4F3E52CD2B10E007A9A0E /* CodeLanguage.swift in Sources */,
+				C8D4F3EB2CD2B19E007A9A0E /* CustomTextView.swift in Sources */,
 				C82607AB2C81649800518D65 /* TitleBarAccessory.swift in Sources */,
-				C82607B02C816B6900518D65 /* HighlightingTextView.swift in Sources */,
+				C8D4F3E12CD2B0DA007A9A0E /* DiffTypes.swift in Sources */,
+				C8D4F3E32CD2B0F5007A9A0E /* StringUtils.swift in Sources */,
+				C8D4F3E72CD2B123007A9A0E /* DiffAnalyzer.swift in Sources */,
 				C82607B22C816B9A00518D65 /* VisualEffectBlur.swift in Sources */,
 				C82607AD2C81656C00518D65 /* WindowAccessor.swift in Sources */,
+				C8D4F3ED2CD2B397007A9A0E /* StatementAnalyzer.swift in Sources */,
+				C8D4F3E92CD2B13E007A9A0E /* DiffTextView.swift in Sources */,
 				C8D3380A2C7FDEB100FA383B /* MedioApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -296,7 +295,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C8D3381C2C7FDEB300FA383B /* MedioTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -304,8 +302,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C8D338262C7FDEB300FA383B /* MedioUITests.swift in Sources */,
-				C8D338282C7FDEB300FA383B /* MedioUITestsLaunchTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -359,6 +355,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -422,6 +419,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -454,6 +452,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Medio/Preview Content\"";
 				DEVELOPMENT_TEAM = YYMLDY74QZ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -484,6 +483,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Medio/Preview Content\"";
 				DEVELOPMENT_TEAM = YYMLDY74QZ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -506,10 +506,10 @@
 		C8D3382F2C7FDEB300FA383B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = YYMLDY74QZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.5;
@@ -525,10 +525,10 @@
 		C8D338302C7FDEB300FA383B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = YYMLDY74QZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.5;
@@ -544,9 +544,9 @@
 		C8D338322C7FDEB300FA383B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = YYMLDY74QZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
@@ -561,9 +561,9 @@
 		C8D338332C7FDEB300FA383B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = YYMLDY74QZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
