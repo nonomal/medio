@@ -29,7 +29,7 @@ class LineNumberView: NSView {
         }
     }
 
-    private let font: NSFont = .monospacedSystemFont(ofSize: 14, weight: .regular) // Updated font size
+    private let font: NSFont = .monospacedSystemFont(ofSize: 14, weight: .regular) // Ensured font size matches
     private let textContainer: NSTextContainer
 
     override init(frame frameRect: NSRect) {
@@ -87,7 +87,7 @@ class LineNumberView: NSView {
 
         // Enumerate through each line in the visible range
         let nsString = content as NSString
-        var lineNumber = nsString.substring(to: characterRange.location).components(separatedBy: .newlines).count // Removed +1
+        var lineNumber = nsString.substring(to: characterRange.location).components(separatedBy: .newlines).count // Starts at 1
 
         // Enumerate lines within the visible character range
         nsString.enumerateSubstrings(in: characterRange, options: [.byLines, .substringNotRequired]) { (substring, lineRange, _, _) in
@@ -116,6 +116,31 @@ class LineNumberView: NSView {
             )
 
             lineNumber += 1
+        }
+
+        // **New Code: Handle the case where the text ends with a newline character**
+        // This ensures that an empty line at the end is counted
+        if nsString.hasSuffix("\n") {
+            // Calculate the y position for the empty line
+            // We'll use the height of a typical line to position it below the last line
+            let lastGlyphIndex = layoutManager.numberOfGlyphs
+            let lineFragmentRect = layoutManager.lineFragmentRect(forGlyphAt: lastGlyphIndex - 1, effectiveRange: nil)
+            let yPosition = lineFragmentRect.origin.y + lineFragmentRect.height + textView.textContainerInset.height
+
+            // Prepare the line number string
+            let lineNumberString = "\(lineNumber)"
+
+            // Calculate the size of the line number string
+            let stringSize = (lineNumberString as NSString).size(withAttributes: attributes)
+
+            // Right align with consistent padding (e.g., 8 pixels)
+            let xPosition = self.bounds.width - stringSize.width - 8
+
+            // Draw the line number string
+            (lineNumberString as NSString).draw(
+                at: NSPoint(x: xPosition, y: yPosition),
+                withAttributes: attributes
+            )
         }
     }
 
