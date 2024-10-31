@@ -29,8 +29,7 @@ class LineNumberView: NSView {
         }
     }
 
-
-    private let font: NSFont = .monospacedSystemFont(ofSize: 11, weight: .regular)
+    private let font: NSFont = .monospacedSystemFont(ofSize: 14, weight: .regular) // Updated font size
     private let textContainer: NSTextContainer
 
     override init(frame frameRect: NSRect) {
@@ -88,7 +87,7 @@ class LineNumberView: NSView {
 
         // Enumerate through each line in the visible range
         let nsString = content as NSString
-        var lineNumber = nsString.substring(to: characterRange.location).components(separatedBy: .newlines).count + 1
+        var lineNumber = nsString.substring(to: characterRange.location).components(separatedBy: .newlines).count // Removed +1
 
         // Enumerate lines within the visible character range
         nsString.enumerateSubstrings(in: characterRange, options: [.byLines, .substringNotRequired]) { (substring, lineRange, _, _) in
