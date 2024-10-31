@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C80031442CD302B70003C2A5 /* LineNumberRulerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C80031432CD302B30003C2A5 /* LineNumberRulerView.swift */; };
+		C80031462CD30DEC0003C2A5 /* LineNumberView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C80031452CD30DE70003C2A5 /* LineNumberView.swift */; };
 		C82607AB2C81649800518D65 /* TitleBarAccessory.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82607AA2C81649800518D65 /* TitleBarAccessory.swift */; };
 		C82607AD2C81656C00518D65 /* WindowAccessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82607AC2C81656C00518D65 /* WindowAccessor.swift */; };
 		C82607B22C816B9A00518D65 /* VisualEffectBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82607B12C816B9A00518D65 /* VisualEffectBlur.swift */; };
@@ -39,7 +39,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		C80031432CD302B30003C2A5 /* LineNumberRulerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineNumberRulerView.swift; sourceTree = "<group>"; };
+		C80031452CD30DE70003C2A5 /* LineNumberView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineNumberView.swift; sourceTree = "<group>"; };
 		C82607AA2C81649800518D65 /* TitleBarAccessory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleBarAccessory.swift; sourceTree = "<group>"; };
 		C82607AC2C81656C00518D65 /* WindowAccessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowAccessor.swift; sourceTree = "<group>"; };
 		C82607B12C816B9A00518D65 /* VisualEffectBlur.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectBlur.swift; sourceTree = "<group>"; };
@@ -117,13 +117,13 @@
 		C8D338082C7FDEB100FA383B /* Medio */ = {
 			isa = PBXGroup;
 			children = (
+				C80031452CD30DE70003C2A5 /* LineNumberView.swift */,
 				C8D338092C7FDEB100FA383B /* MedioApp.swift */,
 				C8D3380B2C7FDEB100FA383B /* ContentView.swift */,
 				C8D4F3E02CD2B0D6007A9A0E /* DiffTypes.swift */,
 				C8D4F3E22CD2B0F0007A9A0E /* StringUtils.swift */,
 				C8D4F3EE2CD2BB6C007A9A0E /* Utils */,
 				C8D4F3E82CD2B13B007A9A0E /* DiffTextView.swift */,
-				C80031432CD302B30003C2A5 /* LineNumberRulerView.swift */,
 				C8D4F3EA2CD2B19B007A9A0E /* CustomTextView.swift */,
 				C82607AE2C8166F700518D65 /* UI Components */,
 				C8D3380D2C7FDEB300FA383B /* Assets.xcassets */,
@@ -284,7 +284,7 @@
 				C8D4F3E12CD2B0DA007A9A0E /* DiffTypes.swift in Sources */,
 				C8D4F3E32CD2B0F5007A9A0E /* StringUtils.swift in Sources */,
 				C82607B22C816B9A00518D65 /* VisualEffectBlur.swift in Sources */,
-				C80031442CD302B70003C2A5 /* LineNumberRulerView.swift in Sources */,
+				C80031462CD30DEC0003C2A5 /* LineNumberView.swift in Sources */,
 				C82607AD2C81656C00518D65 /* WindowAccessor.swift in Sources */,
 				C8D4F3E92CD2B13E007A9A0E /* DiffTextView.swift in Sources */,
 				C8D3380A2C7FDEB100FA383B /* MedioApp.swift in Sources */,

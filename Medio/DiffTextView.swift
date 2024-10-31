@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 struct DiffTextView: NSViewRepresentable {
     @Binding var text: String
@@ -7,8 +8,17 @@ struct DiffTextView: NSViewRepresentable {
     
     static let textDidChangeNotification = NSNotification.Name("DiffTextViewDidChangeNotification")
     
-    func makeNSView(context: Context) -> NSScrollView {
+    func makeNSView(context: Context) -> NSView {
+        let containerView = NSView()
+        
+        // Create line numbers view
+        let lineNumbersView = LineNumberView()
+        lineNumbersView.translatesAutoresizingMaskIntoConstraints = false
+        containerView.addSubview(lineNumbersView)
+        
+        // Create scroll view and text view
         let scrollView = NSScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
         let textView = CustomTextView()
         
         // Configure text view
@@ -17,7 +27,7 @@ struct DiffTextView: NSViewRepresentable {
         textView.isEditable = true
         textView.isSelectable = true
         textView.font = .monospacedSystemFont(ofSize: 14, weight: .regular)
-        textView.textContainerInset = NSSize(width: 0, height: 5)
+        textView.textContainerInset = NSSize(width: 5, height: 5)
         textView.isVerticallyResizable = true
         textView.isHorizontallyResizable = false
         textView.autoresizingMask = [.width]
@@ -32,15 +42,31 @@ struct DiffTextView: NSViewRepresentable {
         scrollView.hasHorizontalScroller = false
         scrollView.autohidesScrollers = true
         scrollView.backgroundColor = .clear
+        scrollView.drawsBackground = false
         
-        // Set up line numbers
-        let lineNumberView = LineNumberRulerView(scrollView: scrollView)
-        scrollView.verticalRulerView = lineNumberView
-        scrollView.hasVerticalRuler = true
-        scrollView.rulersVisible = true
+        containerView.addSubview(scrollView)
         
+        // Set up constraints
+        NSLayoutConstraint.activate([
+            lineNumbersView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            lineNumbersView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            lineNumbersView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
+            lineNumbersView.widthAnchor.constraint(equalToConstant: 40),
+            
+            scrollView.leadingAnchor.constraint(equalTo: lineNumbersView.trailingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            scrollView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
+        ])
+        
+        // Set up line numbers view
+        lineNumbersView.textView = textView
+        
+        // Store references in coordinator
         context.coordinator.textView = textView
+        context.coordinator.lineNumbersView = lineNumbersView
         
+        // Set up notifications
         NotificationCenter.default.addObserver(
             context.coordinator,
             selector: #selector(Coordinator.handleTextChange(_:)),
@@ -48,19 +74,19 @@ struct DiffTextView: NSViewRepresentable {
             object: nil
         )
         
-        return scrollView
+        return containerView
     }
     
-    func updateNSView(_ scrollView: NSScrollView, context: Context) {
-        guard let textView = scrollView.documentView as? NSTextView else { return }
+    func updateNSView(_ containerView: NSView, context: Context) {
+        guard let textView = context.coordinator.textView else { return }
         
         if !context.coordinator.isEditing && textView.string != text {
             let selectedRange = textView.selectedRange()
             textView.string = text
             textView.setSelectedRange(selectedRange)
             highlightDifferences(in: textView)
+            context.coordinator.lineNumbersView?.needsDisplay = true
         }
-        scrollView.verticalRulerView?.needsDisplay = true
     }
     
     private func highlightDifferences(in textView: NSTextView) {
@@ -112,6 +138,7 @@ struct DiffTextView: NSViewRepresentable {
         var isEditing = false
         var isProcessingChange = false
         weak var textView: NSTextView?
+        weak var lineNumbersView: LineNumberView?
         
         init(_ parent: DiffTextView) {
             self.parent = parent
@@ -133,6 +160,7 @@ struct DiffTextView: NSViewRepresentable {
                   !isProcessingChange else { return }
             
             updateText(from: textView)
+            lineNumbersView?.needsDisplay = true
             
             NotificationCenter.default.post(
                 name: DiffTextView.textDidChangeNotification,
