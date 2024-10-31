@@ -6,21 +6,6 @@
 	objectVersion = 70;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		C80031462CD30DEC0003C2A5 /* LineNumberView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C80031452CD30DE70003C2A5 /* LineNumberView.swift */; };
-		C82607AB2C81649800518D65 /* TitleBarAccessory.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82607AA2C81649800518D65 /* TitleBarAccessory.swift */; };
-		C82607AD2C81656C00518D65 /* WindowAccessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82607AC2C81656C00518D65 /* WindowAccessor.swift */; };
-		C82607B22C816B9A00518D65 /* VisualEffectBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82607B12C816B9A00518D65 /* VisualEffectBlur.swift */; };
-		C8D3380A2C7FDEB100FA383B /* MedioApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D338092C7FDEB100FA383B /* MedioApp.swift */; };
-		C8D3380C2C7FDEB100FA383B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D3380B2C7FDEB100FA383B /* ContentView.swift */; };
-		C8D3380E2C7FDEB300FA383B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C8D3380D2C7FDEB300FA383B /* Assets.xcassets */; };
-		C8D338112C7FDEB300FA383B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C8D338102C7FDEB300FA383B /* Preview Assets.xcassets */; };
-		C8D4F3E12CD2B0DA007A9A0E /* DiffTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D4F3E02CD2B0D6007A9A0E /* DiffTypes.swift */; };
-		C8D4F3E32CD2B0F5007A9A0E /* StringUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D4F3E22CD2B0F0007A9A0E /* StringUtils.swift */; };
-		C8D4F3E92CD2B13E007A9A0E /* DiffTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D4F3E82CD2B13B007A9A0E /* DiffTextView.swift */; };
-		C8D4F3EB2CD2B19E007A9A0E /* CustomTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D4F3EA2CD2B19B007A9A0E /* CustomTextView.swift */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXContainerItemProxy section */
 		C8D338182C7FDEB300FA383B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -39,26 +24,36 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		C80031452CD30DE70003C2A5 /* LineNumberView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineNumberView.swift; sourceTree = "<group>"; };
-		C82607AA2C81649800518D65 /* TitleBarAccessory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleBarAccessory.swift; sourceTree = "<group>"; };
-		C82607AC2C81656C00518D65 /* WindowAccessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowAccessor.swift; sourceTree = "<group>"; };
-		C82607B12C816B9A00518D65 /* VisualEffectBlur.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectBlur.swift; sourceTree = "<group>"; };
 		C8D338062C7FDEB100FA383B /* Medio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Medio.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C8D338092C7FDEB100FA383B /* MedioApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedioApp.swift; sourceTree = "<group>"; };
-		C8D3380B2C7FDEB100FA383B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		C8D3380D2C7FDEB300FA383B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		C8D338102C7FDEB300FA383B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		C8D338122C7FDEB300FA383B /* Medio.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Medio.entitlements; sourceTree = "<group>"; };
 		C8D338172C7FDEB300FA383B /* MedioTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MedioTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C8D338212C7FDEB300FA383B /* MedioUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MedioUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		C8D4F3E02CD2B0D6007A9A0E /* DiffTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffTypes.swift; sourceTree = "<group>"; };
-		C8D4F3E22CD2B0F0007A9A0E /* StringUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringUtils.swift; sourceTree = "<group>"; };
-		C8D4F3E82CD2B13B007A9A0E /* DiffTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffTextView.swift; sourceTree = "<group>"; };
-		C8D4F3EA2CD2B19B007A9A0E /* CustomTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C8FBA8F72CD31BA0004F6A8F /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Assets.xcassets,
+			);
+			target = C8D338052C7FDEB100FA383B /* Medio */;
+		};
+		C8FBA8FB2CD31BCF004F6A8F /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Preview Assets.xcassets",
+			);
+			target = C8D338052C7FDEB100FA383B /* Medio */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		C8D4F3EE2CD2BB6C007A9A0E /* Utils */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Utils; sourceTree = "<group>"; };
+		C8FBA8ED2CD31B05004F6A8F /* App */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = App; sourceTree = "<group>"; };
+		C8FBA8EF2CD31B1B004F6A8F /* Models */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Models; sourceTree = "<group>"; };
+		C8FBA8F12CD31B3E004F6A8F /* Views */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Views; sourceTree = "<group>"; };
+		C8FBA8F22CD31B6B004F6A8F /* View Modifiers */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "View Modifiers"; sourceTree = "<group>"; };
+		C8FBA8F32CD31B85004F6A8F /* Resources */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (C8FBA8F72CD31BA0004F6A8F /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Resources; sourceTree = "<group>"; };
+		C8FBA8F92CD31BCF004F6A8F /* Preview Content */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (C8FBA8FB2CD31BCF004F6A8F /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = "Preview Content"; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,16 +81,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		C82607AE2C8166F700518D65 /* UI Components */ = {
-			isa = PBXGroup;
-			children = (
-				C82607B12C816B9A00518D65 /* VisualEffectBlur.swift */,
-				C82607AA2C81649800518D65 /* TitleBarAccessory.swift */,
-				C82607AC2C81656C00518D65 /* WindowAccessor.swift */,
-			);
-			path = "UI Components";
-			sourceTree = "<group>";
-		};
 		C8D337FD2C7FDEB100FA383B = {
 			isa = PBXGroup;
 			children = (
@@ -117,28 +102,15 @@
 		C8D338082C7FDEB100FA383B /* Medio */ = {
 			isa = PBXGroup;
 			children = (
-				C80031452CD30DE70003C2A5 /* LineNumberView.swift */,
-				C8D338092C7FDEB100FA383B /* MedioApp.swift */,
-				C8D3380B2C7FDEB100FA383B /* ContentView.swift */,
-				C8D4F3E02CD2B0D6007A9A0E /* DiffTypes.swift */,
-				C8D4F3E22CD2B0F0007A9A0E /* StringUtils.swift */,
-				C8D4F3EE2CD2BB6C007A9A0E /* Utils */,
-				C8D4F3E82CD2B13B007A9A0E /* DiffTextView.swift */,
-				C8D4F3EA2CD2B19B007A9A0E /* CustomTextView.swift */,
-				C82607AE2C8166F700518D65 /* UI Components */,
-				C8D3380D2C7FDEB300FA383B /* Assets.xcassets */,
 				C8D338122C7FDEB300FA383B /* Medio.entitlements */,
-				C8D3380F2C7FDEB300FA383B /* Preview Content */,
+				C8FBA8ED2CD31B05004F6A8F /* App */,
+				C8FBA8EF2CD31B1B004F6A8F /* Models */,
+				C8FBA8F12CD31B3E004F6A8F /* Views */,
+				C8FBA8F32CD31B85004F6A8F /* Resources */,
+				C8FBA8F22CD31B6B004F6A8F /* View Modifiers */,
+				C8FBA8F92CD31BCF004F6A8F /* Preview Content */,
 			);
 			path = Medio;
-			sourceTree = "<group>";
-		};
-		C8D3380F2C7FDEB300FA383B /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				C8D338102C7FDEB300FA383B /* Preview Assets.xcassets */,
-			);
-			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -157,7 +129,10 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				C8D4F3EE2CD2BB6C007A9A0E /* Utils */,
+				C8FBA8ED2CD31B05004F6A8F /* App */,
+				C8FBA8EF2CD31B1B004F6A8F /* Models */,
+				C8FBA8F12CD31B3E004F6A8F /* Views */,
+				C8FBA8F22CD31B6B004F6A8F /* View Modifiers */,
 			);
 			name = Medio;
 			packageProductDependencies = (
@@ -252,8 +227,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C8D338112C7FDEB300FA383B /* Preview Assets.xcassets in Resources */,
-				C8D3380E2C7FDEB300FA383B /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -278,16 +251,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C8D3380C2C7FDEB100FA383B /* ContentView.swift in Sources */,
-				C8D4F3EB2CD2B19E007A9A0E /* CustomTextView.swift in Sources */,
-				C82607AB2C81649800518D65 /* TitleBarAccessory.swift in Sources */,
-				C8D4F3E12CD2B0DA007A9A0E /* DiffTypes.swift in Sources */,
-				C8D4F3E32CD2B0F5007A9A0E /* StringUtils.swift in Sources */,
-				C82607B22C816B9A00518D65 /* VisualEffectBlur.swift in Sources */,
-				C80031462CD30DEC0003C2A5 /* LineNumberView.swift in Sources */,
-				C82607AD2C81656C00518D65 /* WindowAccessor.swift in Sources */,
-				C8D4F3E92CD2B13E007A9A0E /* DiffTextView.swift in Sources */,
-				C8D3380A2C7FDEB100FA383B /* MedioApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
