@@ -79,8 +79,8 @@ final class DiffAnalyzer {
         if isCode {
             for (sourceIdx, sourceLine) in sourceLines.enumerated() {
                 if let matchIdx = findExactCodeMatch(for: sourceLine.0,
-                                                   in: targetLines,
-                                                   processedLines: processedTargetLines) {
+                                                     in: targetLines,
+                                                     processedLines: processedTargetLines) {
                     lineMatchCache[sourceIdx] = matchIdx
                     processedTargetLines.insert(matchIdx)
                 }
@@ -107,8 +107,8 @@ final class DiffAnalyzer {
     }
     
     private func findExactCodeMatch(for sourceLine: String,
-                                  in targetLines: [(String, NSRange)],
-                                  processedLines: Set<Int>) -> Int? {
+                                    in targetLines: [(String, NSRange)],
+                                    processedLines: Set<Int>) -> Int? {
         let sourceNormalized = normalizeCodeLine(sourceLine)
         
         for (index, (targetLine, _)) in targetLines.enumerated() {
@@ -127,10 +127,10 @@ final class DiffAnalyzer {
     }
     
     private func computeWordDiffs(sourceLine: String,
-                                lineRange: NSRange,
-                                processedTargetLines: inout Set<Int>,
-                                lineMatchCache: [Int: Int],
-                                lineIndex: Int) -> [WordDiff] {
+                                  lineRange: NSRange,
+                                  processedTargetLines: inout Set<Int>,
+                                  lineMatchCache: [Int: Int],
+                                  lineIndex: Int) -> [WordDiff] {
         let trimmedSource = sourceLine.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmedSource.isEmpty { return [] }
         
@@ -162,8 +162,8 @@ final class DiffAnalyzer {
     }
     
     private func findBestMatch(for sourceLine: String,
-                             in targetLines: [(String, NSRange)],
-                             processedLines: Set<Int>) -> Int? {
+                               in targetLines: [(String, NSRange)],
+                               processedLines: Set<Int>) -> Int? {
         let sourceTokens = tokenize(sourceLine)
         var bestMatch: (index: Int, score: Double) = (-1, 0.0)
         let threshold = isCode ? 0.5 : 0.3
@@ -189,10 +189,17 @@ final class DiffAnalyzer {
         let sourceWords = Set(source.filter { $0.type != .whitespace }.map { $0.normalized })
         let targetWords = Set(target.filter { $0.type != .whitespace }.map { $0.normalized })
         
+        // Handle empty cases
+        if sourceWords.isEmpty && targetWords.isEmpty {
+            return 1.0
+        }
+        if sourceWords.isEmpty || targetWords.isEmpty {
+            return 0.0
+        }
+        
         let intersection = sourceWords.intersection(targetWords)
         let union = sourceWords.union(targetWords)
         
-        guard !union.isEmpty else { return 0.0 }
         return Double(intersection.count) / Double(union.count)
     }
     
@@ -200,23 +207,37 @@ final class DiffAnalyzer {
         let sourceStructure = source.filter { $0.type != .whitespace }.map { $0.normalized }
         let targetStructure = target.filter { $0.type != .whitespace }.map { $0.normalized }
         
+        // Handle empty cases
+        if sourceStructure.isEmpty && targetStructure.isEmpty {
+            return 1.0
+        }
+        if sourceStructure.isEmpty || targetStructure.isEmpty {
+            return 0.0
+        }
+        
         let lcs = longestCommonSubsequence(sourceStructure, targetStructure)
         let maxLength = Double(max(sourceStructure.count, targetStructure.count))
         
-        guard maxLength > 0 else { return 1.0 }
         return Double(lcs) / maxLength
     }
     
     private func longestCommonSubsequence(_ source: [String], _ target: [String]) -> Int {
-        var dp = Array(repeating: Array(repeating: 0, count: target.count + 1),
-                      count: source.count + 1)
+        // Handle empty cases first
+        guard !source.isEmpty && !target.isEmpty else {
+            return 0
+        }
         
-        for i in 1...source.count {
-            for j in 1...target.count {
-                if source[i-1] == target[j-1] {
-                    dp[i][j] = dp[i-1][j-1] + 1
+        // Create DP matrix with safe dimensions
+        var dp = Array(repeating: Array(repeating: 0, count: target.count + 1),
+                       count: source.count + 1)
+        
+        // Safe iteration over valid ranges
+        for i in 0..<source.count {
+            for j in 0..<target.count {
+                if source[i] == target[j] {
+                    dp[i + 1][j + 1] = dp[i][j] + 1
                 } else {
-                    dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+                    dp[i + 1][j + 1] = max(dp[i + 1][j], dp[i][j + 1])
                 }
             }
         }
@@ -328,33 +349,50 @@ final class DiffAnalyzer {
     }
     
     private func compareLines(sourceLine: String,
-                            targetLine: String,
-                            sourceStartLocation: Int,
-                            totalLength: Int) -> [WordDiff] {
+                              targetLine: String,
+                              sourceStartLocation: Int,
+                              totalLength: Int) -> [WordDiff] {
+        // Guard against empty or invalid input
+        guard !sourceLine.isEmpty && !targetLine.isEmpty && totalLength > 0 else {
+            return []
+        }
+        
         let sourceTokens = tokenize(sourceLine)
         let targetTokens = tokenize(targetLine)
+        
+        // Guard against empty tokens
+        guard !sourceTokens.isEmpty else {
+            return []
+        }
         
         var diffs: [WordDiff] = []
         var currentLocation = 0
         
         for sourceToken in sourceTokens {
+            // Ensure we don't exceed bounds
             guard currentLocation < totalLength else { break }
             
             let tokenLength = min(sourceToken.text.utf16.count, totalLength - currentLocation)
+            guard tokenLength > 0 else { continue }
+            
             let tokenLocation = sourceStartLocation + currentLocation
             
             let matchFound = targetTokens.contains { targetToken in
                 if isCode {
                     return sourceToken.normalized == targetToken.normalized &&
-                           sourceToken.type == targetToken.type
+                    sourceToken.type == targetToken.type
                 } else {
                     return sourceToken.normalized == targetToken.normalized
                 }
             }
             
             if !matchFound && sourceToken.type != .whitespace {
+                // Ensure range is valid
+                let safeLength = min(tokenLength, totalLength - tokenLocation)
+                guard safeLength > 0 else { continue }
+                
                 diffs.append(WordDiff(
-                    range: NSRange(location: tokenLocation, length: tokenLength),
+                    range: NSRange(location: tokenLocation, length: safeLength),
                     type: .modification
                 ))
             }
