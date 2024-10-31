@@ -1,40 +1,47 @@
 import SwiftUI
+import AppKit
 
 struct MenuBarView: View {
     @ObservedObject var updater: UpdateChecker
     @EnvironmentObject var menuBarController: MenuBarController
     @Environment(\.dismiss) var dismiss
     
+    private var appIcon: NSImage {
+        if let bundleIcon = NSImage(named: NSImage.applicationIconName) {
+            return bundleIcon
+        }
+        return NSWorkspace.shared.icon(forFile: Bundle.main.bundlePath)
+    }
+    
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 16) {
             // App Icon and Version
             VStack(spacing: 8) {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 48))
-                    .foregroundColor(.blue)
-                
-                Text("Medio")
-                    .font(.title2.bold())
+                Image(nsImage: appIcon)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 64, height: 64)
                 
                 Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0.0")")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
-            .padding(.top)
+            .padding(.top, 16)
             
             // Status Section
             Group {
                 if updater.isChecking {
-                    VStack(spacing: 12) {
+                    VStack(spacing: 8) {
                         ProgressView()
+                            .scaleEffect(1.2)
                         Text("Checking for updates...")
-                            .font(.subheadline)
+                            .font(.headline)
                             .foregroundColor(.secondary)
                     }
                 } else if let error = updater.error {
                     VStack(spacing: 8) {
                         Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 24))
+                            .font(.system(size: 28))
                             .foregroundColor(.red)
                         Text(error)
                             .font(.subheadline)
@@ -44,7 +51,7 @@ struct MenuBarView: View {
                 } else if updater.updateAvailable {
                     VStack(spacing: 12) {
                         Image(systemName: "arrow.down.circle.fill")
-                            .font(.system(size: 24))
+                            .font(.system(size: 28))
                             .foregroundColor(.blue)
                         
                         if let version = updater.latestVersion {
@@ -60,7 +67,7 @@ struct MenuBarView: View {
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal)
                             }
-                            .frame(maxHeight: 100)
+                            .frame(maxHeight: 80)
                         }
                         
                         Button {
@@ -73,12 +80,11 @@ struct MenuBarView: View {
                                 .frame(maxWidth: 200)
                         }
                         .buttonStyle(.borderedProminent)
-                        .controlSize(.large)
                     }
                 } else {
                     VStack(spacing: 8) {
                         Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 24))
+                            .font(.system(size: 28))
                             .foregroundColor(.green)
                         Text("Medio is up to date")
                             .font(.headline)
@@ -86,11 +92,12 @@ struct MenuBarView: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.vertical, 8)
             
-            Spacer()
+            Divider()
             
             // Bottom Buttons
-            HStack(spacing: 20) {
+            HStack(spacing: 16) {
                 Button("Check Again") {
                     updater.checkForUpdates()
                 }
@@ -103,9 +110,10 @@ struct MenuBarView: View {
                 .buttonStyle(.plain)
                 .foregroundColor(.secondary)
             }
-            .padding(.bottom)
+            .padding(.bottom, 16)
         }
-        .padding()
-        .frame(width: 300, height: 400)
+        .padding(.horizontal)
+        .frame(width: 300)
+        .fixedSize(horizontal: false, vertical: true)
     }
 }

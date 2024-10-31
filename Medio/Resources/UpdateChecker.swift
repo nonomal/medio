@@ -24,29 +24,18 @@ class UpdateChecker: ObservableObject {
     @Published var statusIcon: String = "checkmark.circle"
     
     var onStatusChange: ((String) -> Void)?
+    var onUpdateAvailable: (() -> Void)?
     
     private let currentVersion: String
     private let githubRepo: String
     private var updateCheckTimer: Timer?
     
     init() {
-        // Get the marketing version (CFBundleShortVersionString)
-        let marketingVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
-        // Get the build version as fallback (CFBundleVersion)
-        let buildVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String
-        
-        // Log version information for debugging
-        print("Marketing Version (CFBundleShortVersionString): \(marketingVersion ?? "nil")")
-        print("Build Version (CFBundleVersion): \(buildVersion ?? "nil")")
-        
-        // Use marketing version if available, fallback to build version, or default to 1.0.0
-        self.currentVersion = marketingVersion ?? buildVersion ?? "1.0.0"
-        print("Using version for comparison: \(self.currentVersion)")
-        
-        self.githubRepo = "nuance-dev/Medio"
-        setupTimer()
-        updateStatusIcon()
-    }
+            self.currentVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0.0"
+            self.githubRepo = "nuance-dev/Medio"
+            setupTimer()
+            updateStatusIcon()
+        }
     
     private func setupTimer() {
         // Initial check after 2 seconds
@@ -142,6 +131,13 @@ class UpdateChecker: ObservableObject {
             print("Latest version from GitHub (raw): \(release.tagName)")
             print("Latest version cleaned: \(cleanLatestVersion)")
             print("Current version for comparison: \(currentVersion)")
+            
+            updateAvailable = compareVersions(current: currentVersion, latest: cleanLatestVersion)
+                        if updateAvailable {
+                            DispatchQueue.main.async {
+                                self.onUpdateAvailable?()
+                            }
+                        }
             
             latestVersion = cleanLatestVersion
             releaseNotes = release.body
