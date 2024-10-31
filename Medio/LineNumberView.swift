@@ -1,26 +1,55 @@
 import AppKit
+
 class LineNumberView: NSView {
     weak var textView: NSTextView? {
         didSet {
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(handleTextViewBoundsChange(_:)),
-                name: NSView.boundsDidChangeNotification,
-                object: textView?.enclosingScrollView?.contentView
-            )
+            // Remove previous observer if any
+            oldValue?.enclosingScrollView?.contentView.postsBoundsChangedNotifications = false
+            oldValue?.layoutManager?.removeTextContainer(textContainer)
+            
+            if let textView = textView {
+                // Ensure the scroll view's content view posts bounds changed notifications
+                textView.enclosingScrollView?.contentView.postsBoundsChangedNotifications = true
+                NotificationCenter.default.addObserver(
+                    self,
+                    selector: #selector(handleTextViewBoundsChange(_:)),
+                    name: NSView.boundsDidChangeNotification,
+                    object: textView.enclosingScrollView?.contentView
+                )
+                
+                // Add text container to layout manager
+                if let layoutManager = textView.layoutManager {
+                    layoutManager.addTextContainer(textContainer)
+                }
+            }
         }
     }
     
     private let font: NSFont = .monospacedSystemFont(ofSize: 11, weight: .regular)
+    private let textContainer = NSTextContainer(size: NSSize(width: 0, height: 0))
     
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
+        setupTextContainer()
         wantsLayer = true
-        layer?.backgroundColor = .clear
+        layer?.backgroundColor = NSColor.clear.cgColor
     }
     
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        super.init(coder: coder)
+        setupTextContainer()
+        wantsLayer = true
+        layer?.backgroundColor = NSColor.clear.cgColor
+    }
+    
+    private func setupTextContainer() {
+        textContainer.widthTracksTextView = false
+        textContainer.heightTracksTextView = false
+    }
+    
+    // Ensure the view uses a flipped coordinate system
+    override var isFlipped: Bool {
+        return true
     }
     
     @objc private func handleTextViewBoundsChange(_ notification: Notification) {
@@ -37,58 +66,50 @@ class LineNumberView: NSView {
             return
         }
         
+        // Set the font for line numbers
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: NSColor.secondaryLabelColor
+        ]
+        
         // Get the visible rect considering scroll position
         let visibleRect = textView.enclosingScrollView?.contentView.bounds ?? .zero
         
-        // Calculate the range of text that's currently visible
-        var glyphRange = layoutManager.glyphRange(forBoundingRect: visibleRect, in: container)
-        glyphRange = layoutManager.characterRange(forGlyphRange: glyphRange, actualGlyphRange: nil)
+        // Calculate the range of glyphs that's currently visible
+        let glyphRange = layoutManager.glyphRange(forBoundingRect: visibleRect, in: container)
+        let characterRange = layoutManager.characterRange(forGlyphRange: glyphRange, actualGlyphRange: nil)
         
-        // Count newlines before visible range to determine starting line number
-        let preVisibleString = content.substring(to: glyphRange.location)
-        let startingLineNumber = preVisibleString.components(separatedBy: .newlines).count
+        // Enumerate through each line in the visible range
+        let nsString = content as NSString
+        var lineNumber = nsString.substring(to: characterRange.location).components(separatedBy: .newlines).count + 1
         
-        // Get visible content
-        let visibleString = content.substring(with: glyphRange)
-        let lines = visibleString.components(separatedBy: .newlines)
-        
-        // Calculate padding for right alignment based on total lines
-        let totalLines = content.components(separatedBy: .newlines).count
-        _ = "\(totalLines)".size(withAttributes: [.font: font]).width + 16 // 8px padding on each side
-        
-        // Draw line numbers
-        var lineNumber = startingLineNumber
-        var currentGlyphPosition = glyphRange.location
-        
-        for line in lines {
-            let lineRange = NSRange(location: currentGlyphPosition, length: line.count)
-            var lineRect = layoutManager.lineFragmentRect(forGlyphAt: lineRange.location, effectiveRange: nil)
+        // Enumerate lines within the visible character range
+        nsString.enumerateSubstrings(in: characterRange, options: [.byLines, .substringNotRequired]) { (_, lineRange, _, _) in
+            // Get the glyph range for the current line
+            let lineGlyphRange = layoutManager.glyphRange(forCharacterRange: lineRange, actualCharacterRange: nil)
             
-            // Adjust for text container insets and scroll position
-            lineRect.origin.y += textView.textContainerInset.height
-            
-            let attributes: [NSAttributedString.Key: Any] = [
-                .font: font,
-                .foregroundColor: NSColor.secondaryLabelColor
-            ]
-            
-            let lineNumberString = "\(lineNumber + 1)"
-            let stringSize = lineNumberString.size(withAttributes: attributes)
-            
-            // Right align with consistent padding
-            let x = bounds.width - stringSize.width - 8
-            let y = lineRect.minY
-            
-            // Only draw if the line is visible
-            if y >= visibleRect.minY - lineRect.height && y <= visibleRect.maxY {
+            // Get the line fragment rect for the first glyph in the line
+            if let lineFragmentRect = layoutManager.lineFragmentRect(forGlyphAt: lineGlyphRange.location, effectiveRange: nil) {
+                // Calculate the y position by adding the line fragment's origin y and the text container inset
+                let yPosition = lineFragmentRect.origin.y + textView.textContainerInset.height
+                
+                // Prepare the line number string
+                let lineNumberString = "\(lineNumber)"
+                
+                // Calculate the size of the line number string
+                let stringSize = lineNumberString.size(withAttributes: attributes)
+                
+                // Right align with consistent padding (e.g., 8 pixels)
+                let xPosition = bounds.width - stringSize.width - 8
+                
+                // Draw the line number string
                 lineNumberString.draw(
-                    at: NSPoint(x: x, y: y),
+                    at: NSPoint(x: xPosition, y: yPosition),
                     withAttributes: attributes
                 )
+                
+                lineNumber += 1
             }
-            
-            lineNumber += 1
-            currentGlyphPosition += line.count + 1 // +1 for newline character
         }
     }
 }
