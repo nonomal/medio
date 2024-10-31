@@ -1,5 +1,4 @@
 import SwiftUI
-import AppKit
 
 struct DiffTextView: NSViewRepresentable {
     @Binding var text: String
@@ -18,30 +17,30 @@ struct DiffTextView: NSViewRepresentable {
         textView.isEditable = true
         textView.isSelectable = true
         textView.font = .monospacedSystemFont(ofSize: 14, weight: .regular)
-        textView.textContainerInset = NSSize(width: 5, height: 10)
+        textView.textContainerInset = NSSize(width: 0, height: 5)
         textView.isVerticallyResizable = true
         textView.isHorizontallyResizable = false
         textView.autoresizingMask = [.width]
         textView.textContainer?.widthTracksTextView = true
         textView.isAutomaticQuoteSubstitutionEnabled = false
         textView.isAutomaticDashSubstitutionEnabled = false
+        textView.backgroundColor = .clear
         
         // Configure scroll view
         scrollView.documentView = textView
         scrollView.hasVerticalScroller = true
         scrollView.hasHorizontalScroller = false
         scrollView.autohidesScrollers = true
+        scrollView.backgroundColor = .clear
         
-        // Add line number ruler view
+        // Set up line numbers
         let lineNumberView = LineNumberRulerView(scrollView: scrollView)
         scrollView.verticalRulerView = lineNumberView
         scrollView.hasVerticalRuler = true
         scrollView.rulersVisible = true
         
-        // Store textView reference in coordinator
         context.coordinator.textView = textView
         
-        // Add observer for text changes
         NotificationCenter.default.addObserver(
             context.coordinator,
             selector: #selector(Coordinator.handleTextChange(_:)),
@@ -61,12 +60,7 @@ struct DiffTextView: NSViewRepresentable {
             textView.setSelectedRange(selectedRange)
             highlightDifferences(in: textView)
         }
-        
         scrollView.verticalRulerView?.needsDisplay = true
-    }
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
     }
     
     private func highlightDifferences(in textView: NSTextView) {
@@ -89,11 +83,7 @@ struct DiffTextView: NSViewRepresentable {
                     NSColor.systemRed.withAlphaComponent(0.2) :
                     NSColor.systemGreen.withAlphaComponent(0.2)
                 
-                attributedString.addAttribute(
-                    .backgroundColor,
-                    value: backgroundColor,
-                    range: lineDiff.range
-                )
+                attributedString.addAttribute(.backgroundColor, value: backgroundColor, range: lineDiff.range)
                 
                 for wordDiff in lineDiff.wordDiffs {
                     guard wordDiff.range.location + wordDiff.range.length <= text.utf16.count else { continue }
@@ -111,6 +101,10 @@ struct DiffTextView: NSViewRepresentable {
         }
         
         textView.textStorage?.setAttributedString(attributedString)
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
     }
     
     class Coordinator: NSObject, NSTextViewDelegate {
@@ -140,7 +134,6 @@ struct DiffTextView: NSViewRepresentable {
             
             updateText(from: textView)
             
-            // Notify about text change
             NotificationCenter.default.post(
                 name: DiffTextView.textDidChangeNotification,
                 object: nil,
@@ -154,7 +147,6 @@ struct DiffTextView: NSViewRepresentable {
                   side != parent.side,
                   let textView = self.textView else { return }
             
-            // Trigger an update on the other side
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 self.parent.highlightDifferences(in: textView)
@@ -181,65 +173,6 @@ struct DiffTextView: NSViewRepresentable {
                 
                 self.isProcessingChange = false
             }
-        }
-        
-        func textView(_ textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
-            if commandSelector == #selector(NSResponder.insertNewline(_:)) {
-                textView.insertNewline(nil)
-                return true
-            }
-            return false
-        }
-    }
-}
-
-// LineNumberRulerView and CustomTextView remain unchanged
-class LineNumberRulerView: NSRulerView {
-    var font: NSFont = .monospacedSystemFont(ofSize: 11, weight: .regular)
-    
-    init(scrollView: NSScrollView) {
-        super.init(scrollView: scrollView, orientation: .verticalRuler)
-        self.clientView = scrollView.documentView as? NSTextView
-        self.ruleThickness = 40
-    }
-    
-    required init(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    override func drawHashMarksAndLabels(in rect: NSRect) {
-        guard let textView = self.clientView as? NSTextView,
-              let layoutManager = textView.layoutManager,
-              let container = textView.textContainer,
-              let content = textView.string as NSString? else {
-            return
-        }
-        
-        let visibleRect = textView.visibleRect
-        _ = layoutManager.glyphRange(forBoundingRect: visibleRect, in: container)
-        
-        var lineNumber = 1
-        
-        content.enumerateSubstrings(in: NSRange(location: 0, length: content.length),
-                                  options: [.byLines, .substringNotRequired]) { _, range, _, _ in
-            let glyphRange = layoutManager.glyphRange(forCharacterRange: range, actualCharacterRange: nil)
-            let glyphRect = layoutManager.boundingRect(forGlyphRange: glyphRange, in: container)
-            
-            if glyphRect.intersects(visibleRect) {
-                let attributes: [NSAttributedString.Key: Any] = [
-                    .font: self.font,
-                    .foregroundColor: NSColor.secondaryLabelColor
-                ]
-                
-                let lineNumberString = "\(lineNumber)"
-                let size = lineNumberString.size(withAttributes: attributes)
-                let x = self.bounds.width - size.width - 4
-                let y = glyphRect.minY + textView.textContainerInset.height
-                
-                lineNumberString.draw(at: CGPoint(x: x, y: y), withAttributes: attributes)
-            }
-            
-            lineNumber += 1
         }
     }
 }

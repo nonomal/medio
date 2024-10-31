@@ -1,22 +1,19 @@
 import Foundation
 
-enum DiffSide {
-    case left
-    case right
+enum DiffSide: Hashable {
+    case left, right
 }
 
-enum DiffType {
-    case addition
-    case deletion
-    case modification
+enum DiffType: Hashable {
+    case addition, deletion, modification
 }
 
-struct WordDiff {
+struct WordDiff: Hashable {
     let range: NSRange
     let type: DiffType
 }
 
-struct LineDiff {
+struct LineDiff: Hashable {
     let range: NSRange
     let wordDiffs: [WordDiff]
     let isDifferent: Bool
