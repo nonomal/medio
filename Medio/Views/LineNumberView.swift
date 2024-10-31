@@ -78,7 +78,7 @@ class LineNumberView: NSView {
             .foregroundColor: NSColor.secondaryLabelColor
         ]
 
-        // Use the textView's visibleRect instead of the scrollView's contentView bounds
+        // Use the textView's visibleRect
         let visibleRect = textView.visibleRect
 
         // Calculate the range of glyphs that's currently visible
@@ -87,7 +87,10 @@ class LineNumberView: NSView {
 
         // Enumerate through each line in the visible range
         let nsString = content as NSString
-        var lineNumber = nsString.substring(to: characterRange.location).components(separatedBy: .newlines).count + 1
+        var lineNumber = nsString.substring(to: characterRange.location).components(separatedBy: .newlines).count
+        if lineNumber == 0 {
+            lineNumber = 1
+        }
 
         // Enumerate lines within the visible character range
         nsString.enumerateSubstrings(in: characterRange, options: [.byLines, .substringNotRequired]) { (substring, lineRange, _, _) in
