@@ -119,17 +119,12 @@ class UpdateChecker: ObservableObject {
         }
         
         do {
-            // Print raw response for debugging
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print("Raw GitHub response: \(jsonString)")
-            }
             
             let decoder = JSONDecoder()
             let release = try decoder.decode(GitHubRelease.self, from: data)
             
             let cleanLatestVersion = release.tagName.replacingOccurrences(of: "v", with: "")
-            print("Latest version from GitHub (raw): \(release.tagName)")
-            print("Latest version cleaned: \(cleanLatestVersion)")
+            print("Latest version: \(cleanLatestVersion)")
             print("Current version for comparison: \(currentVersion)")
             
             updateAvailable = compareVersions(current: currentVersion, latest: cleanLatestVersion)
@@ -162,24 +157,17 @@ class UpdateChecker: ObservableObject {
             .split(separator: ".")
             .compactMap { Int($0) }
         
-        print("Comparing versions:")
-        print("Current parts: \(currentParts)")
-        print("Latest parts: \(latestParts)")
         
         // Ensure we have at least 3 components (major.minor.patch)
         let paddedCurrent = currentParts + Array(repeating: 0, count: max(3 - currentParts.count, 0))
         let paddedLatest = latestParts + Array(repeating: 0, count: max(3 - latestParts.count, 0))
         
-        print("Padded current: \(paddedCurrent)")
-        print("Padded latest: \(paddedLatest)")
         
         // Compare each version component
         for i in 0..<min(paddedCurrent.count, paddedLatest.count) {
             if paddedLatest[i] > paddedCurrent[i] {
-                print("Update available: \(paddedLatest[i]) > \(paddedCurrent[i]) at position \(i)")
                 return true
             } else if paddedLatest[i] < paddedCurrent[i] {
-                print("Current is newer: \(paddedLatest[i]) < \(paddedCurrent[i]) at position \(i)")
                 return false
             }
         }
