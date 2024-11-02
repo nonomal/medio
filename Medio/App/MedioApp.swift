@@ -49,3 +49,12 @@ struct MedioApp: App {
         }
     }
 }
+
+// MARK: - Preview
+struct MedioApp_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+            .preferredColorScheme(.light) // Change to .dark for dark mode preview
+            .environmentObject(MenuBarController())
+    }
+}
