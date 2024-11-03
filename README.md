@@ -15,6 +15,8 @@ Because the world really needed another diff checker.
 
 ![42115](https://github.com/user-attachments/assets/d4a202c5-a160-4a66-a7c7-dad346de86a3)
 
+UPDATE: from v3.0.0 onwards Medio is using the [Differ](https://github.com/tonyarnold/Differ) Swift package from Tony Arnold
+
 ## 💻 Get it
 
 You can find the .app here:
