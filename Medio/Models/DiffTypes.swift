@@ -1,7 +1,10 @@
 import Foundation
 
-enum DiffSide: Hashable {
-    case left, right
+import Foundation
+
+struct Line {
+    let text: String
+    let range: NSRange
 }
 
 enum DiffType: Hashable {
@@ -18,4 +21,7 @@ struct LineDiff: Hashable {
     let wordDiffs: [WordDiff]
     let isDifferent: Bool
     let lineNumber: Int
+}
+enum DiffSide: Hashable {
+    case left, right
 }

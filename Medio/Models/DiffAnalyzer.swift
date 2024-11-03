@@ -1,263 +1,174 @@
 import Foundation
+import Differ
 
 final class DiffAnalyzer {
     private let sourceText: String
     private let targetText: String
-    private let sourceLines: [(String, NSRange)]
-    private let targetLines: [(String, NSRange)]
     private let isCode: Bool
+    private let sourceLines: [Line]
+    private let targetLines: [Line]
     
     init(sourceText: String, targetText: String) {
         self.sourceText = sourceText
         self.targetText = targetText
-        self.sourceLines = Self.getLinesWithRanges(sourceText)
-        self.targetLines = Self.getLinesWithRanges(targetText)
         self.isCode = CodeAnalyzer.detectCodeContent(sourceText)
+        self.sourceLines = Self.getLinesWithRanges(text: sourceText)
+        self.targetLines = Self.getLinesWithRanges(text: targetText)
     }
     
-    private static func getLinesWithRanges(_ text: String) -> [(String, NSRange)] {
+    private static func getLinesWithRanges(text: String) -> [Line] {
         var currentLocation = 0
         let lines = text.components(separatedBy: .newlines)
         return lines.map { line in
             let length = line.utf16.count
             let range = NSRange(location: currentLocation, length: length)
-            // Important: Account for newline in all cases except the last line
-            currentLocation += length + 1
-            return (line, range)
+            currentLocation += length + 1 // +1 for newline character
+            return Line(text: line, range: range)
         }
     }
     
     func computeDifferences() -> [LineDiff] {
-        var processedTargetLines = Set<Int>()
-        var lineMatchCache: [Int: Int] = [:]
+        let sourceLinesText = sourceLines.map { $0.text }
+        let targetLinesText = targetLines.map { $0.text }
         
-        // First pass: exact matches for code
-        if isCode {
-            for (sourceIdx, sourceLine) in sourceLines.enumerated() {
-                if let matchIdx = findExactCodeMatch(
-                    for: sourceLine.0,
-                    in: targetLines,
-                    processedLines: processedTargetLines
-                ) {
-                    lineMatchCache[sourceIdx] = matchIdx
-                    processedTargetLines.insert(matchIdx)
-                }
-            }
-        }
+        // Use patch instead of diff for safer index handling
+        let patches = patch(from: sourceLinesText, to: targetLinesText)
+        var lineDiffs: [LineDiff] = []
+        var processedIndices = Set<Int>()
         
-        // Second pass: compute diffs for all lines
-        return sourceLines.enumerated().map { (lineIndex, lineInfo) -> LineDiff in
-            let (sourceLine, lineRange) = lineInfo
-            
-            // Verify range validity
-            guard lineRange.location + lineRange.length <= sourceText.utf16.count else {
-                return LineDiff(range: lineRange, wordDiffs: [], isDifferent: false, lineNumber: lineIndex)
-            }
-            
-            let wordDiffs = computeWordDiffs(
-                sourceLine: sourceLine,
-                lineRange: lineRange,
-                processedTargetLines: &processedTargetLines,
-                lineMatchCache: lineMatchCache,
-                lineIndex: lineIndex
-            )
-            
-            return LineDiff(
-                range: lineRange,
-                wordDiffs: wordDiffs,
-                isDifferent: !wordDiffs.isEmpty,
-                lineNumber: lineIndex
-            )
-        }
-    }
-    
-    private func findExactCodeMatch(
-        for sourceLine: String,
-        in targetLines: [(String, NSRange)],
-        processedLines: Set<Int>
-    ) -> Int? {
-        let sourceNormalized = CodeAnalyzer.normalizeCodeLine(sourceLine)
-        
-        for (index, (targetLine, _)) in targetLines.enumerated() {
-            guard !processedLines.contains(index) else { continue }
-            let targetNormalized = CodeAnalyzer.normalizeCodeLine(targetLine)
-            if sourceNormalized == targetNormalized {
-                return index
-            }
-        }
-        return nil
-    }
-    
-    private func computeWordDiffs(
-        sourceLine: String,
-        lineRange: NSRange,
-        processedTargetLines: inout Set<Int>,
-        lineMatchCache: [Int: Int],
-        lineIndex: Int
-    ) -> [WordDiff] {
-        let trimmedSource = sourceLine.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmedSource.isEmpty { return [] }
-        
-        // Use cached match for code
-        if isCode, let matchIndex = lineMatchCache[lineIndex] {
-            guard matchIndex < targetLines.count else { return [] }
-            return compareLines(
-                sourceLine: sourceLine,
-                targetLine: targetLines[matchIndex].0,
-                sourceStartLocation: lineRange.location,
-                totalLength: lineRange.length
-            )
-        }
-        
-        if let matchIndex = findBestMatch(
-            for: sourceLine,
-            in: targetLines,
-            processedLines: processedTargetLines
-        ) {
-            processedTargetLines.insert(matchIndex)
-            return compareLines(
-                sourceLine: sourceLine,
-                targetLine: targetLines[matchIndex].0,
-                sourceStartLocation: lineRange.location,
-                totalLength: lineRange.length
-            )
-        }
-        
-        // No match found - mark entire line as changed
-        return [WordDiff(range: lineRange, type: .deletion)]
-    }
-    
-    private func findBestMatch(
-        for sourceLine: String,
-        in targetLines: [(String, NSRange)],
-        processedLines: Set<Int>
-    ) -> Int? {
-        let sourceTokens = Tokenizer.tokenize(sourceLine, isCode: isCode)
-        var bestMatch: (index: Int, score: Double) = (-1, 0.0)
-        let threshold = isCode ? 0.5 : 0.3
-        
-        for (index, (targetLine, _)) in targetLines.enumerated() {
-            guard !processedLines.contains(index) else { continue }
-            let targetTokens = Tokenizer.tokenize(targetLine, isCode: isCode)
-            let similarity = SimilarityCalculator.calculateSimilarity(
-                source: sourceTokens,
-                target: targetTokens,
-                isCode: isCode
-            )
-            
-            if similarity > bestMatch.score {
-                bestMatch = (index, similarity)
-            }
-        }
-        
-        return bestMatch.score > threshold ? bestMatch.index : nil
-    }
-    
-    private func compareLines(
-        sourceLine: String,
-        targetLine: String,
-        sourceStartLocation: Int,
-        totalLength: Int
-    ) -> [WordDiff] {
-        // Validate input
-        guard !sourceLine.isEmpty && !targetLine.isEmpty && totalLength > 0 else {
-            return []
-        }
-        
-        let sourceTokens = Tokenizer.tokenize(sourceLine, isCode: isCode)
-        let targetTokens = Tokenizer.tokenize(targetLine, isCode: isCode)
-        
-        guard !sourceTokens.isEmpty else { return [] }
-        
-        var diffs: [WordDiff] = []
-        var currentLocation = sourceStartLocation
-        
-        // Track token positions to handle multi-token changes
-        var lastMatchEndLocation = sourceStartLocation
-        
-        for sourceToken in sourceTokens {
-            let tokenLength = sourceToken.text.utf16.count
-            
-            // Ensure we don't exceed bounds
-            guard currentLocation + tokenLength <= sourceStartLocation + totalLength else {
-                break
-            }
-            
-            if sourceToken.type != .whitespace {
-                let isMatched = targetTokens.contains { targetToken in
-                    if isCode {
-                        return sourceToken.normalized == targetToken.normalized &&
-                               sourceToken.type == targetToken.type
-                    } else {
-                        return sourceToken.normalized == targetToken.normalized
-                    }
+        // Handle patches
+        for p in patches {
+            switch p {
+            case let .deletion(at):
+                guard at < sourceLines.count else { continue }
+                processedIndices.insert(at)
+                let sourceLine = sourceLines[at]
+                
+                // Check if this is a modification by looking for similar line
+                if let targetLine = findSimilarLine(sourceLine.text, in: targetLinesText) {
+                    let wordDiffs = computeWordDiffs(sourceLine: sourceLine, targetText: targetLine)
+                    lineDiffs.append(LineDiff(
+                        range: sourceLine.range,
+                        wordDiffs: wordDiffs,
+                        isDifferent: !wordDiffs.isEmpty,
+                        lineNumber: at
+                    ))
+                } else {
+                    // Pure deletion
+                    lineDiffs.append(LineDiff(
+                        range: sourceLine.range,
+                        wordDiffs: [WordDiff(range: sourceLine.range, type: .deletion)],
+                        isDifferent: true,
+                        lineNumber: at
+                    ))
                 }
                 
-                if !isMatched {
-                    // Create word diff for unmatched token
-                    diffs.append(WordDiff(
-                        range: NSRange(location: currentLocation, length: tokenLength),
-                        type: .modification
-                    ))
-                    lastMatchEndLocation = currentLocation + tokenLength
-                }
+            case .insertion:
+                // Handled on target side
+                continue
             }
-            
-            currentLocation += tokenLength
         }
         
-        return diffs
+        // Handle unchanged lines
+        for i in 0..<sourceLines.count {
+            guard !processedIndices.contains(i) else { continue }
+            
+            let sourceLine = sourceLines[i]
+            if targetLinesText.contains(sourceLine.text) {
+                // Exact match - unchanged line
+                lineDiffs.append(LineDiff(
+                    range: sourceLine.range,
+                    wordDiffs: [],
+                    isDifferent: false,
+                    lineNumber: i
+                ))
+            } else {
+                // Check for similar line
+                if let targetLine = findSimilarLine(sourceLine.text, in: targetLinesText) {
+                    let wordDiffs = computeWordDiffs(sourceLine: sourceLine, targetText: targetLine)
+                    lineDiffs.append(LineDiff(
+                        range: sourceLine.range,
+                        wordDiffs: wordDiffs,
+                        isDifferent: !wordDiffs.isEmpty,
+                        lineNumber: i
+                    ))
+                } else {
+                    // No match found - mark as deletion
+                    lineDiffs.append(LineDiff(
+                        range: sourceLine.range,
+                        wordDiffs: [WordDiff(range: sourceLine.range, type: .deletion)],
+                        isDifferent: true,
+                        lineNumber: i
+                    ))
+                }
+            }
+        }
+        
+        return lineDiffs.sorted { $0.lineNumber < $1.lineNumber }
     }
-    private func findMatchingTokenIndices(_ source: [TextToken], _ target: [TextToken]) -> Set<Int> {
-           var matchingIndices = Set<Int>()
-           var processed = Set<Int>()
-           
-           for (sourceIdx, sourceToken) in source.enumerated() {
-               for (targetIdx, targetToken) in target.enumerated() {
-                   guard !processed.contains(targetIdx) else { continue }
-                   
-                   if tokensMatch(sourceToken, targetToken) {
-                       matchingIndices.insert(sourceIdx)
-                       processed.insert(targetIdx)
-                       break
-                   }
-               }
-           }
-           
-           return matchingIndices
-       }
-       
-       private func tokensMatch(_ source: TextToken, _ target: TextToken) -> Bool {
-           if isCode {
-               return source.normalized == target.normalized && source.type == target.type
-           } else {
-               return source.normalized == target.normalized
-           }
-       }
-       
-       private func doesTokenMatch(_ sourceToken: TextToken, in targetTokens: [TextToken]) -> Bool {
-           targetTokens.contains { targetToken in
-               tokensMatch(sourceToken, targetToken)
-           }
-       }
-       
-       private func determineModificationType(_ sourceToken: TextToken, _ targetTokens: [TextToken]) -> DiffType {
-           // For code, we want to be more specific about the type of change
-           if isCode {
-               let similarTokens = targetTokens.filter { token in
-                   token.type == sourceToken.type &&
-                   token.normalized.count > 2 &&
-                   (token.normalized.contains(sourceToken.normalized) ||
-                    sourceToken.normalized.contains(token.normalized))
-               }
-               
-               if !similarTokens.isEmpty {
-                   return .modification
-               }
-           }
-           
-           // Default to deletion for the left side (will be treated as addition on right side)
-           return .deletion
-       }
-   }
-
+    
+    private func findSimilarLine(_ sourceLine: String, in targetLines: [String]) -> String? {
+        // Try exact match first
+        if let exactMatch = targetLines.first(where: { $0 == sourceLine }) {
+            return exactMatch
+        }
+        
+        // Then try similarity matching
+        let sourceWords = Set(tokenizeLine(sourceLine))
+        var bestMatch: (text: String, similarity: Double) = ("", 0)
+        
+        for targetLine in targetLines {
+            let targetWords = Set(tokenizeLine(targetLine))
+            let commonWords = sourceWords.intersection(targetWords)
+            let similarity = Double(commonWords.count) / Double(max(sourceWords.count, targetWords.count))
+            
+            if similarity > bestMatch.similarity && similarity > 0.3 {  // Lower threshold for better matching
+                bestMatch = (targetLine, similarity)
+            }
+        }
+        
+        return bestMatch.similarity > 0 ? bestMatch.text : nil
+    }
+    
+    private func computeWordDiffs(sourceLine: Line, targetText: String) -> [WordDiff] {
+        let sourceWords = tokenizeLine(sourceLine.text)
+        let targetWords = tokenizeLine(targetText)
+        
+        let patches = patch(from: sourceWords, to: targetWords)
+        var wordDiffs: [WordDiff] = []
+        var currentLocation = sourceLine.range.location
+        var processedLocations = Set<Int>()
+        
+        for (index, word) in sourceWords.enumerated() {
+            let wordLength = word.utf16.count
+            let wordStart = currentLocation
+            
+            if patches.contains(where: { patch in
+                if case .deletion(let at) = patch {
+                    return at == index
+                }
+                return false
+            }) {
+                // This word was changed
+                processedLocations.insert(wordStart)
+                wordDiffs.append(WordDiff(
+                    range: NSRange(location: wordStart, length: wordLength),
+                    type: .modification
+                ))
+            }
+            
+            currentLocation += wordLength + (index < sourceWords.count - 1 ? 1 : 0)
+        }
+        
+        return wordDiffs
+    }
+    
+    private func tokenizeLine(_ line: String) -> [String] {
+        if isCode {
+            return StringUtils.tokenizeCode(line)
+        } else {
+            return line.components(separatedBy: .whitespaces)
+                .filter { !$0.isEmpty }
+        }
+    }
+}

@@ -1,0 +1,15 @@
+{
+  "originHash" : "9a662e07010ed1fad2892f6874b14ca05e863b2a379b871107180dce3aa44774",
+  "pins" : [
+    {
+      "identity" : "differ",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tonyarnold/Differ",
+      "state" : {
+        "revision" : "5520fda947f1f9777a806389c2ba587219bc0538",
+        "version" : "1.4.6"
+      }
+    }
+  ],
+  "version" : 3
+}

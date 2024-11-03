@@ -6,6 +6,10 @@
 	objectVersion = 70;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C857AB962CD67B7600D69E59 /* Differ in Frameworks */ = {isa = PBXBuildFile; productRef = C857AB952CD67B7600D69E59 /* Differ */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		C8D338182C7FDEB300FA383B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -63,6 +67,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C857AB962CD67B7600D69E59 /* Differ in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -138,6 +143,7 @@
 			);
 			name = Medio;
 			packageProductDependencies = (
+				C857AB952CD67B7600D69E59 /* Differ */,
 			);
 			productName = Medio;
 			productReference = C8D338062C7FDEB100FA383B /* Medio.app */;
@@ -212,6 +218,7 @@
 			);
 			mainGroup = C8D337FD2C7FDEB100FA383B;
 			packageReferences = (
+				C857AB942CD67B7600D69E59 /* XCRemoteSwiftPackageReference "Differ" */,
 			);
 			productRefGroup = C8D338072C7FDEB100FA383B /* Products */;
 			projectDirPath = "";
@@ -429,7 +436,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 2.1.4;
+				MARKETING_VERSION = 3.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = Minimal.Medio;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -460,7 +467,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 2.1.4;
+				MARKETING_VERSION = 3.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = Minimal.Medio;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -580,6 +587,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C857AB942CD67B7600D69E59 /* XCRemoteSwiftPackageReference "Differ" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tonyarnold/Differ";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.4.6;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C857AB952CD67B7600D69E59 /* Differ */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C857AB942CD67B7600D69E59 /* XCRemoteSwiftPackageReference "Differ" */;
+			productName = Differ;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C8D337FE2C7FDEB100FA383B /* Project object */;
 }
