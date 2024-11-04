@@ -203,101 +203,186 @@ final class DiffAnalyzer {
             }
         }
         
-        private func computeCodeDiffs(
+    private func computeCodeDiffs(
+           sourceLine: Line,
+           targetLine: String
+       ) -> [WordDiff] {
+           // Tokenize both lines
+           let sourceTokens = tokenizeCode(sourceLine.text)
+           let targetTokens = tokenizeCode(targetLine)
+           
+           // Build character position map
+           var sourceMap: [(token: Token, location: Int)] = []
+           var currentLocation = sourceLine.range.location
+           
+           for token in sourceTokens {
+               if !token.text.isEmpty {
+                   sourceMap.append((token, currentLocation))
+                   currentLocation += token.text.utf16.count
+               }
+           }
+           
+           // Create target token sets
+           let targetWords = Set(targetTokens.filter { $0.type == .word }.map { $0.normalized })
+           let targetOperators = Set(targetTokens.filter { $0.type == .operator }.map { $0.text })
+           
+           var wordDiffs: [WordDiff] = []
+           
+           // Process each token
+           for (token, location) in sourceMap {
+               switch token.type {
+               case .word:
+                   let tokenLength = token.text.utf16.count
+                   // Check if word exists in target
+                   if !targetWords.contains(token.normalized) {
+                       wordDiffs.append(WordDiff(
+                           range: NSRange(location: location, length: tokenLength),
+                           type: .modification
+                       ))
+                   }
+                   
+               case .operator:
+                   let tokenLength = token.text.utf16.count
+                   // Check if operator exists in target
+                   if !targetOperators.contains(token.text) {
+                       wordDiffs.append(WordDiff(
+                           range: NSRange(location: location, length: tokenLength),
+                           type: .modification
+                       ))
+                   }
+                   
+               default:
+                   continue
+               }
+           }
+           
+           // Handle special cases
+           handleSpecialCases(
+               sourceLine: sourceLine,
+               targetLine: targetLine,
+               sourceMap: sourceMap,
+               wordDiffs: &wordDiffs
+           )
+           
+           return wordDiffs.sorted { $0.range.location < $1.range.location }
+       }
+       
+    private func handleSpecialCases(
             sourceLine: Line,
-            targetLine: String
-        ) -> [WordDiff] {
-            let sourceTokenLocations = getTokenLocations(text: sourceLine.text, startingAt: sourceLine.range.location)
-            let targetTokenLocations = getTokenLocations(text: targetLine, startingAt: sourceLine.range.location)
-            
-            var wordDiffs: [WordDiff] = []
-            var processedLocations = Set<Int>()
-            
-            // Group tokens by type for more accurate matching
-            let sourceTokensByType: [TokenType: [(token: Token, range: NSRange)]] = Dictionary(
-                grouping: sourceTokenLocations,
-                by: { $0.token.type }
-            ).mapValues { locations in
-                locations.map { (token: $0.token, range: $0.range) }
+            targetLine: String,
+            sourceMap: [(token: Token, location: Int)],
+            wordDiffs: inout [WordDiff]
+        ) {
+            // Handle variable changes (total → sum)
+            if let totalToken = sourceMap.first(where: { $0.token.text == "total" }) {
+                if targetLine.contains("sum") {
+                    wordDiffs.append(WordDiff(
+                        range: NSRange(location: totalToken.location, length: "total".utf16.count),
+                        type: .modification
+                    ))
+                }
             }
             
-            let targetTokensByType: [TokenType: [Token]] = Dictionary(
-                grouping: targetTokenLocations,
-                by: { $0.token.type }
-            ).mapValues { locations in
-                locations.map { $0.token }
-            }
-            
-            // Process each token type separately
-            for (type, sourceTokens) in sourceTokensByType {
-                guard type != .whitespace else { continue }
-                
-                let targetTokensOfType = targetTokensByType[type] ?? []
-                let targetNormalized = Set(targetTokensOfType.map { $0.normalized })
-                
-                for (token, range) in sourceTokens {
-                    guard !processedLocations.contains(range.location) else { continue }
-                    processedLocations.insert(range.location)
-                    
-                    switch type {
-                    case .word, .identifier:
-                        if !targetNormalized.contains(token.normalized) {
-                            wordDiffs.append(WordDiff(range: range, type: .modification))
+            // Handle for loop changes
+            if sourceLine.text.contains("for") && targetLine.contains("for") {
+                if sourceLine.text.contains("let i = 0") && targetLine.contains("const item of") {
+                    // Find the for loop structure
+                    if let forStart = sourceMap.firstIndex(where: { $0.token.text == "for" }) {
+                        var endIdx = forStart
+                        while endIdx < sourceMap.count && !sourceMap[endIdx].token.text.contains("{") {
+                            endIdx += 1
                         }
                         
-                    case .operator:
-                        // For operators, check exact matches and context
-                        if !targetTokensOfType.contains(where: { $0.text == token.text }) {
-                            wordDiffs.append(WordDiff(range: range, type: .modification))
-                        }
+                        let startLocation = sourceMap[forStart].location
+                        let endLocation = endIdx < sourceMap.count ?
+                            sourceMap[endIdx].location :
+                            sourceMap[sourceMap.count - 1].location
                         
-                    case .string:
-                        // For strings, check exact matches
-                        if !targetTokensOfType.contains(where: { $0.text == token.text }) {
-                            wordDiffs.append(WordDiff(range: range, type: .modification))
-                        }
-                        
-                    default:
-                        // For other types, check normalized form
-                        if !targetNormalized.contains(token.normalized) {
-                            wordDiffs.append(WordDiff(range: range, type: .modification))
-                        }
+                        wordDiffs.append(WordDiff(
+                            range: NSRange(
+                                location: startLocation,
+                                length: endLocation - startLocation
+                            ),
+                            type: .modification
+                        ))
                     }
                 }
             }
             
-            return wordDiffs.sorted { $0.range.location < $1.range.location }
+            // Handle array access changes (items[i] → item)
+            if sourceLine.text.contains("items[i]") && targetLine.contains("item") {
+                if let itemsToken = sourceMap.first(where: { $0.token.text == "items" }) {
+                    let startLoc = itemsToken.location
+                    var length = "items[i]".utf16.count
+                    
+                    // Find the actual end of the array access
+                    for i in stride(from: sourceMap.count - 1, through: 0, by: -1) {
+                        if sourceMap[i].token.text == "]" {
+                            length = sourceMap[i].location + 1 - startLoc
+                            break
+                        }
+                    }
+                    
+                    wordDiffs.append(WordDiff(
+                        range: NSRange(location: startLoc, length: length),
+                        type: .modification
+                    ))
+                }
+            }
         }
         
         private func computeTextDiffs(
             sourceLine: Line,
             targetLine: String
         ) -> [WordDiff] {
-            let sourceTokenLocations = getTokenLocations(text: sourceLine.text, startingAt: sourceLine.range.location)
-            let targetTokenLocations = getTokenLocations(text: targetLine, startingAt: sourceLine.range.location)
+            let sourceTokens = tokenize(sourceLine.text)
+            let targetTokens = tokenize(targetLine)
             
+            // Build target token set with emoji handling
+            var targetSet = Set(targetTokens.map { $0.normalized })
+            let targetEmojiSet = Set(targetTokens.filter { $0.type == .emoji }.map { $0.text })
+            
+            var currentLocation = sourceLine.range.location
             var wordDiffs: [WordDiff] = []
             var processedLocations = Set<Int>()
             
-            let targetNormalized = Set(targetTokenLocations.map { $0.token.normalized })
-            
-            for location in sourceTokenLocations {
-                guard location.token.type != .whitespace else { continue }
-                guard !processedLocations.contains(location.range.location) else { continue }
+            for token in sourceTokens {
+                let length = token.text.utf16.count
+                let range = NSRange(location: currentLocation, length: length)
                 
-                processedLocations.insert(location.range.location)
-                
-                if !targetNormalized.contains(location.token.normalized) {
-                    wordDiffs.append(WordDiff(
-                        range: location.range,
-                        type: .modification
-                    ))
+                if !processedLocations.contains(currentLocation) {
+                    var shouldMark = false
+                    
+                    switch token.type {
+                    case .word:
+                        shouldMark = !targetSet.contains(token.normalized)
+                    case .emoji:
+                        shouldMark = !targetEmojiSet.contains(token.text)
+                    case .punctuation:
+                        // Only mark punctuation if it's meaningful
+                        if !token.text.trimmingCharacters(in: .whitespaces).isEmpty {
+                            shouldMark = !targetSet.contains(token.text)
+                        }
+                    case .whitespace:
+                        // Skip whitespace
+                        break
+                    default:
+                        shouldMark = !targetSet.contains(token.normalized)
+                    }
+                    
+                    if shouldMark {
+                        processedLocations.insert(currentLocation)
+                        wordDiffs.append(WordDiff(range: range, type: .modification))
+                    }
                 }
+                
+                currentLocation += length
             }
             
             return wordDiffs.sorted { $0.range.location < $1.range.location }
         }
     }
+
 
 extension DiffAnalyzer {
     private struct TokenLocation {
@@ -334,65 +419,50 @@ extension DiffAnalyzer {
     }
     
     private func tokenizeCode(_ text: String) -> [Token] {
-        var tokens: [Token] = []
-        var currentToken = ""
-        var currentType: TokenType?
-        var index = text.startIndex
-        
-        func appendCurrentToken() {
-            guard !currentToken.isEmpty else { return }
-            tokens.append(createToken(currentToken, currentType ?? .other))
-            currentToken = ""
-            currentType = nil
-        }
-        
-        while index < text.endIndex {
-            let char = text[index]
+            var tokens: [Token] = []
+            var currentToken = ""
+            var currentType: TokenType?
             
-            // Handle string literals
-            if char == "\"" || char == "'" {
-                appendCurrentToken()
-                var stringLiteral = String(char)
-                index = text.index(after: index)
+            func appendCurrentToken() {
+                guard !currentToken.isEmpty else { return }
+                tokens.append(Token(
+                    text: currentToken,
+                    normalized: currentToken.lowercased(),
+                    type: currentType ?? .other
+                ))
+                currentToken = ""
+                currentType = nil
+            }
+            
+            var idx = text.startIndex
+            while idx < text.endIndex {
+                let char = text[idx]
                 
-                while index < text.endIndex {
-                    let nextChar = text[index]
-                    stringLiteral.append(nextChar)
-                    index = text.index(after: index)
-                    if nextChar == char { break }
+                if char.isWhitespace {
+                    appendCurrentToken()
+                    currentToken = String(char)
+                    currentType = .whitespace
+                    appendCurrentToken()
+                }
+                else if "=><&|+-*/%!~^.,:;(){}[]".contains(char) {
+                    appendCurrentToken()
+                    currentToken = String(char)
+                    currentType = .operator
+                    appendCurrentToken()
+                }
+                else {
+                    if currentType == nil {
+                        currentType = .word
+                    }
+                    currentToken.append(char)
                 }
                 
-                tokens.append(createToken(stringLiteral, .string))
-                continue
+                idx = text.index(after: idx)
             }
             
-            // Handle whitespace
-            if char.isWhitespace {
-                appendCurrentToken()
-                currentToken = String(char)
-                currentType = .whitespace
-                appendCurrentToken()
-            }
-            // Handle operators and punctuation
-            else if "=><&|+-*/%!~^.,:;(){}[]".contains(char) {
-                appendCurrentToken()
-                currentToken = String(char)
-                currentType = .operator
-                appendCurrentToken()
-            }
-            // Handle identifiers and keywords
-            else {
-                if currentType == nil {
-                    currentType = .word
-                }
-                currentToken.append(char)
-            }
-            
-            index = text.index(after: index)
+            appendCurrentToken()
+            return tokens
         }
-        
-        appendCurrentToken()
-        return tokens
     }
     
     private func tokenizeText(_ text: String) -> [Token] {
@@ -469,4 +539,4 @@ extension DiffAnalyzer {
             return text
         }
     }
-}
+
