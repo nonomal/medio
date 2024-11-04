@@ -9,6 +9,9 @@ enum TokenType {
     case whitespace
     case punctuation
     case other
+    case emoji
+    case string
+    case symbol
 }
 
 struct TextToken {
@@ -16,4 +19,10 @@ struct TextToken {
     let normalized: String
     let type: TokenType
     var isCode: Bool
+}
+
+struct Token {
+    let text: String
+    let normalized: String
+    let type: TokenType
 }
