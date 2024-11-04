@@ -196,92 +196,108 @@ final class DiffAnalyzer {
             targetLine: String,
             similarity: Double
         ) -> [WordDiff] {
+            if isCode {
+                return computeCodeDiffs(sourceLine: sourceLine, targetLine: targetLine)
+            } else {
+                return computeTextDiffs(sourceLine: sourceLine, targetLine: targetLine)
+            }
+        }
+        
+        private func computeCodeDiffs(
+            sourceLine: Line,
+            targetLine: String
+        ) -> [WordDiff] {
             let sourceTokenLocations = getTokenLocations(text: sourceLine.text, startingAt: sourceLine.range.location)
             let targetTokenLocations = getTokenLocations(text: targetLine, startingAt: sourceLine.range.location)
             
-            // Create mapping of normalized tokens to their original tokens and locations
-            var sourceMap: [String: [(token: Token, range: NSRange)]] = [:]
-            for loc in sourceTokenLocations {
-                sourceMap[loc.token.normalized, default: []].append((loc.token, loc.range))
-            }
-            
-            var targetMap: [String: [(token: Token, range: NSRange)]] = [:]
-            for loc in targetTokenLocations {
-                targetMap[loc.token.normalized, default: []].append((loc.token, loc.range))
-            }
-            
             var wordDiffs: [WordDiff] = []
-            var processedSourceLocations = Set<Int>()
+            var processedLocations = Set<Int>()
             
-            // Process source tokens
-            for sourceLocation in sourceTokenLocations {
-                guard sourceLocation.token.type != .whitespace else { continue }
-                
-                let sourceNormalized = sourceLocation.token.normalized
-                
-                // Skip if we've already processed this location
-                guard !processedSourceLocations.contains(sourceLocation.range.location) else { continue }
-                processedSourceLocations.insert(sourceLocation.range.location)
-                
-                // Check if this token exists in the target
-                if let targetMatches = targetMap[sourceNormalized], !targetMatches.isEmpty {
-                    // Token exists in both source and target - check if it's in the same position
-                    let sourcePosRatio = Double(sourceLocation.range.location - sourceLine.range.location) /
-                                       Double(sourceLine.range.length)
-                    
-                    var bestMatch: (ratio: Double, match: (token: Token, range: NSRange))?
-                    for targetMatch in targetMatches {
-                        let targetPosRatio = Double(targetMatch.range.location - sourceLine.range.location) /
-                                           Double(targetLine.utf16.count)
-                        let posDiff = abs(sourcePosRatio - targetPosRatio)
-                        
-                        if bestMatch == nil || posDiff < bestMatch!.ratio {
-                            bestMatch = (posDiff, targetMatch)
-                        }
-                    }
-                    
-                    // If position difference is significant, mark as modification
-                    if let best = bestMatch, best.ratio > 0.3 {
-                        wordDiffs.append(WordDiff(
-                            range: sourceLocation.range,
-                            type: .modification
-                        ))
-                    }
-                } else {
-                    // Token doesn't exist in target - it's a deletion or modification
-                    wordDiffs.append(WordDiff(
-                        range: sourceLocation.range,
-                        type: .modification
-                    ))
-                }
+            // Group tokens by type for more accurate matching
+            let sourceTokensByType: [TokenType: [(token: Token, range: NSRange)]] = Dictionary(
+                grouping: sourceTokenLocations,
+                by: { $0.token.type }
+            ).mapValues { locations in
+                locations.map { (token: $0.token, range: $0.range) }
             }
             
-            // Handle code-specific cases
-            if isCode {
-                // For code, we want to be more precise about operator and punctuation changes
-                let sourceOperators = Set(sourceTokenLocations
-                    .filter { $0.token.type == .operator || $0.token.type == .punctuation }
-                    .map { $0.token.normalized })
+            let targetTokensByType: [TokenType: [Token]] = Dictionary(
+                grouping: targetTokenLocations,
+                by: { $0.token.type }
+            ).mapValues { locations in
+                locations.map { $0.token }
+            }
+            
+            // Process each token type separately
+            for (type, sourceTokens) in sourceTokensByType {
+                guard type != .whitespace else { continue }
                 
-                let targetOperators = Set(targetTokenLocations
-                    .filter { $0.token.type == .operator || $0.token.type == .punctuation }
-                    .map { $0.token.normalized })
+                let targetTokensOfType = targetTokensByType[type] ?? []
+                let targetNormalized = Set(targetTokensOfType.map { $0.normalized })
                 
-                // Add operator/punctuation differences
-                for sourceLocation in sourceTokenLocations where
-                    (sourceLocation.token.type == .operator || sourceLocation.token.type == .punctuation) {
-                    if !targetOperators.contains(sourceLocation.token.normalized) {
-                        wordDiffs.append(WordDiff(
-                            range: sourceLocation.range,
-                            type: .modification
-                        ))
+                for (token, range) in sourceTokens {
+                    guard !processedLocations.contains(range.location) else { continue }
+                    processedLocations.insert(range.location)
+                    
+                    switch type {
+                    case .word, .identifier:
+                        if !targetNormalized.contains(token.normalized) {
+                            wordDiffs.append(WordDiff(range: range, type: .modification))
+                        }
+                        
+                    case .operator:
+                        // For operators, check exact matches and context
+                        if !targetTokensOfType.contains(where: { $0.text == token.text }) {
+                            wordDiffs.append(WordDiff(range: range, type: .modification))
+                        }
+                        
+                    case .string:
+                        // For strings, check exact matches
+                        if !targetTokensOfType.contains(where: { $0.text == token.text }) {
+                            wordDiffs.append(WordDiff(range: range, type: .modification))
+                        }
+                        
+                    default:
+                        // For other types, check normalized form
+                        if !targetNormalized.contains(token.normalized) {
+                            wordDiffs.append(WordDiff(range: range, type: .modification))
+                        }
                     }
                 }
             }
             
             return wordDiffs.sorted { $0.range.location < $1.range.location }
         }
-}
+        
+        private func computeTextDiffs(
+            sourceLine: Line,
+            targetLine: String
+        ) -> [WordDiff] {
+            let sourceTokenLocations = getTokenLocations(text: sourceLine.text, startingAt: sourceLine.range.location)
+            let targetTokenLocations = getTokenLocations(text: targetLine, startingAt: sourceLine.range.location)
+            
+            var wordDiffs: [WordDiff] = []
+            var processedLocations = Set<Int>()
+            
+            let targetNormalized = Set(targetTokenLocations.map { $0.token.normalized })
+            
+            for location in sourceTokenLocations {
+                guard location.token.type != .whitespace else { continue }
+                guard !processedLocations.contains(location.range.location) else { continue }
+                
+                processedLocations.insert(location.range.location)
+                
+                if !targetNormalized.contains(location.token.normalized) {
+                    wordDiffs.append(WordDiff(
+                        range: location.range,
+                        type: .modification
+                    ))
+                }
+            }
+            
+            return wordDiffs.sorted { $0.range.location < $1.range.location }
+        }
+    }
 
 extension DiffAnalyzer {
     private struct TokenLocation {
