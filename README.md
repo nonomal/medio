@@ -57,6 +57,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Links
 
-- Website: [mediano.vercel.app](https://mediano.vercel.app)
+- Website: [nuancedev.vercel.app](https://nuancedev.vercel.app)
 - Report issues: [GitHub Issues](https://github.com/nuance-dev/Medio/issues)
 - Follow updates: [@Nuanced](https://twitter.com/Nuancedev)
