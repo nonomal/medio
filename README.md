@@ -57,6 +57,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Links
 
-- Website: [Website](https://nuancedev.vercel.app)
+- Website: [Nuanc.me](https://nuanc.me)
 - Report issues: [GitHub Issues](https://github.com/nuance-dev/Medio/issues)
 - Follow updates: [@Nuanced](https://twitter.com/Nuancedev)
