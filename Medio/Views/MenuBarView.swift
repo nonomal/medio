@@ -3,7 +3,6 @@ import AppKit
 
 struct MenuBarView: View {
     @ObservedObject var updater: UpdateChecker
-    @EnvironmentObject var menuBarController: MenuBarController
     @Environment(\.dismiss) var dismiss
     
     private var appIcon: NSImage {

@@ -21,9 +21,7 @@ class UpdateChecker: ObservableObject {
     @Published var downloadURL: URL?
     @Published var isChecking = false
     @Published var error: String?
-    @Published var statusIcon: String = "checkmark.circle"
     
-    var onStatusChange: ((String) -> Void)?
     var onUpdateAvailable: (() -> Void)?
     
     private let currentVersion: String
@@ -31,11 +29,10 @@ class UpdateChecker: ObservableObject {
     private var updateCheckTimer: Timer?
     
     init() {
-            self.currentVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0.0"
-            self.githubRepo = "nuance-dev/Medio"
-            setupTimer()
-            updateStatusIcon()
-        }
+        self.currentVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0.0"
+        self.githubRepo = "nuance-dev/Medio"
+        setupTimer()
+    }
     
     private func setupTimer() {
         // Initial check after 2 seconds
@@ -49,31 +46,17 @@ class UpdateChecker: ObservableObject {
         }
     }
     
-    private func updateStatusIcon() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            if self.isChecking {
-                self.statusIcon = "arrow.triangle.2.circlepath"
-            } else {
-                self.statusIcon = self.updateAvailable ? "exclamationmark.circle" : "checkmark.circle"
-            }
-            self.onStatusChange?(self.statusIcon)
-        }
-    }
-    
     func checkForUpdates() {
         print("Checking for updates...")
         print("Current version: \(currentVersion)")
         
         isChecking = true
-        updateStatusIcon()
         error = nil
         
         let baseURL = "https://api.github.com/repos/\(githubRepo)/releases/latest"
         guard let url = URL(string: baseURL) else {
             error = "Invalid GitHub repository URL"
             isChecking = false
-            updateStatusIcon()
             return
         }
         
@@ -91,7 +74,6 @@ class UpdateChecker: ObservableObject {
     private func handleUpdateResponse(data: Data?, response: HTTPURLResponse?, error: Error?) {
         defer {
             isChecking = false
-            updateStatusIcon()
         }
         
         if let error = error {
