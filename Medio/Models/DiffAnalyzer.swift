@@ -34,6 +34,7 @@ final class DiffAnalyzer {
         let patches = extendedPatch(from: sourceLinesText, to: targetLinesText)
         var lineDiffs: [LineDiff] = []
         var processedIndices = Set<Int>()
+        var usedTargetLines = Set<Int>()
         
         for (sourceIdx, sourceLine) in sourceLines.enumerated() {
             if processedIndices.contains(sourceIdx) { continue }
@@ -46,11 +47,14 @@ final class DiffAnalyzer {
                 return false
             }) {
                 // Find the best matching target line
-                if let (targetLine, similarity) = findBestMatch(
+                if let (targetLine, targetIdx, similarity) = findBestMatchWithIndex(
                     sourceLine: sourceLine.text,
+                    sourceIndex: sourceIdx,
                     in: targetLinesText,
+                    excluding: usedTargetLines,
                     threshold: isCode ? 0.5 : 0.3
                 ) {
+                    usedTargetLines.insert(targetIdx)
                     diff = createLineDiff(
                         sourceLine: sourceLine,
                         targetLine: targetLine,
@@ -67,35 +71,44 @@ final class DiffAnalyzer {
                     )
                 }
             } else {
-                // Line wasn't part of any patch - check if it's unchanged
-                if targetLinesText.contains(sourceLine.text) {
-                    diff = LineDiff(
-                        range: sourceLine.range,
-                        wordDiffs: [],
-                        isDifferent: false,
-                        lineNumber: sourceIdx
-                    )
-                } else {
-                    // Try to find a similar line
-                    if let (targetLine, similarity) = findBestMatch(
-                        sourceLine: sourceLine.text,
-                        in: targetLinesText,
-                        threshold: isCode ? 0.5 : 0.3
-                    ) {
+                // Line wasn't part of any patch - find matching target line by position
+                if let targetIdx = findMatchingTargetLine(
+                    sourceLine: sourceLine.text,
+                    sourceIndex: sourceIdx,
+                    in: targetLinesText,
+                    patches: patches,
+                    excluding: usedTargetLines
+                ) {
+                    usedTargetLines.insert(targetIdx)
+                    // Check if lines are identical
+                    if targetLinesText[targetIdx] == sourceLine.text {
+                        diff = LineDiff(
+                            range: sourceLine.range,
+                            wordDiffs: [],
+                            isDifferent: false,
+                            lineNumber: sourceIdx
+                        )
+                    } else {
+                        // Similar but not identical - compute word diffs
+                        let similarity = calculateSimilarity(
+                            source: sourceLine.text,
+                            target: targetLinesText[targetIdx]
+                        )
                         diff = createLineDiff(
                             sourceLine: sourceLine,
-                            targetLine: targetLine,
+                            targetLine: targetLinesText[targetIdx],
                             lineNumber: sourceIdx,
                             similarity: similarity
                         )
-                    } else {
-                        diff = LineDiff(
-                            range: sourceLine.range,
-                            wordDiffs: [WordDiff(range: sourceLine.range, type: .deletion)],
-                            isDifferent: true,
-                            lineNumber: sourceIdx
-                        )
                     }
+                } else {
+                    // No matching target line found
+                    diff = LineDiff(
+                        range: sourceLine.range,
+                        wordDiffs: [WordDiff(range: sourceLine.range, type: .deletion)],
+                        isDifferent: true,
+                        lineNumber: sourceIdx
+                    )
                 }
             }
             
@@ -145,6 +158,79 @@ final class DiffAnalyzer {
         }
         
         return bestMatch.similarity >= threshold ? bestMatch : nil
+    }
+    
+    private func findBestMatchWithIndex(
+        sourceLine: String,
+        sourceIndex: Int = -1,
+        in targetLines: [String],
+        excluding excludedIndices: Set<Int>,
+        threshold: Double
+    ) -> (line: String, index: Int, similarity: Double)? {
+        // Priority 1: Same position
+        if sourceIndex >= 0 && sourceIndex < targetLines.count && !excludedIndices.contains(sourceIndex) {
+            let similarity = calculateSimilarity(source: sourceLine, target: targetLines[sourceIndex])
+            if similarity >= threshold {
+                return (targetLines[sourceIndex], sourceIndex, similarity)
+            }
+        }
+
+        // Priority 2: Best similarity across all target lines
+        var bestMatch: (line: String, index: Int, similarity: Double) = ("", -1, 0)
+        for (idx, targetLine) in targetLines.enumerated() {
+            if excludedIndices.contains(idx) { continue }
+            let similarity = calculateSimilarity(source: sourceLine, target: targetLine)
+            if similarity > bestMatch.similarity {
+                bestMatch = (targetLine, idx, similarity)
+            }
+        }
+
+        return bestMatch.similarity >= threshold ? bestMatch : nil
+    }
+    
+    private func findMatchingTargetLine(
+        sourceLine: String,
+        sourceIndex: Int,
+        in targetLines: [String],
+        patches: [ExtendedPatch<String>],
+        excluding excludedIndices: Set<Int>
+    ) -> Int? {
+        let threshold = isCode ? 0.5 : 0.3
+
+        // Priority 1: Same position (most common and reliable match)
+        if sourceIndex < targetLines.count && !excludedIndices.contains(sourceIndex) {
+            let similarity = calculateSimilarity(source: sourceLine, target: targetLines[sourceIndex])
+            if similarity >= threshold {
+                return sourceIndex
+            }
+        }
+
+        // Priority 2: Nearby positions with best similarity
+        let searchRange = 5
+        let startIdx = max(0, sourceIndex - searchRange)
+        let endIdx = min(targetLines.count - 1, sourceIndex + searchRange)
+
+        var bestMatch: (index: Int, similarity: Double) = (-1, 0)
+        for idx in startIdx...endIdx {
+            if excludedIndices.contains(idx) { continue }
+            let similarity = calculateSimilarity(source: sourceLine, target: targetLines[idx])
+            if similarity >= threshold && similarity > bestMatch.similarity {
+                bestMatch = (idx, similarity)
+            }
+        }
+
+        if bestMatch.index >= 0 { return bestMatch.index }
+
+        // Priority 3: Any remaining target line
+        for (idx, targetLine) in targetLines.enumerated() {
+            if excludedIndices.contains(idx) { continue }
+            let similarity = calculateSimilarity(source: sourceLine, target: targetLine)
+            if similarity >= threshold && similarity > bestMatch.similarity {
+                bestMatch = (idx, similarity)
+            }
+        }
+
+        return bestMatch.index >= 0 ? bestMatch.index : nil
     }
     
     private func calculateSimilarity(source: String, target: String) -> Double {
